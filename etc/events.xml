@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/**
+ * @author    Web200 <contact@web200.fr>
+ * @copyright 2019 Web200
+ * @license   https://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link      https://www.web200.fr/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="web200_imageresize_clean_images_cache_after">
+        <observer name="flush_all_pagecache" instance="Magento\PageCache\Observer\InvalidateCache" />
+        <observer name="flush_varnish_pagecache" instance="Magento\CacheInvalidate\Observer\FlushAllCacheObserver"/>
+    </event>
+</config>

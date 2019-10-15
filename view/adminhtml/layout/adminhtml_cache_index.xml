@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/**
+ * @author    Web200 <contact@web200.fr>
+ * @copyright 2019 Web200
+ * @license   https://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link      https://www.web200.fr/
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceBlock name="cache.additional">
+            <block class="Web200\ImageResize\Block\Adminhtml\Cache\Additional"
+                   name="web200_imageresize.cache.additional"
+                   template="Web200_ImageResize::system/cache/additional.phtml"/>
+        </referenceBlock>
+    </body>
+</page>
