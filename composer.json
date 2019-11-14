@@ -2,7 +2,7 @@
   "name": "web200/magento-mod-web200_image-resize",
   "description": "Magento 2 Module to add simple image resizing",
   "require": {
-    "php": "^7.1|^7.2"
+    "php": "^7.1|^7.2|^7.3"
   },
   "type": "magento2-module",
   "license": [
