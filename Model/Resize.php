@@ -132,6 +132,8 @@ class Resize
      */
     public function resizeAndGetUrl(string $imagePath, $width, $height, array $resizeSettings = []): string
     {
+        /** @var string $resultUrl */
+        $resultUrl = '';
         try {
             if (strpos($imagePath, 'http') !== 0) {
                 $this->relativeFilename = $imagePath;
