@@ -110,6 +110,11 @@ class ImageResize implements ArgumentInterface
             }
         }
 
+        if ($retina) {
+            $imageUrl = $this->resize->resizeAndGetUrl($imagePath, $width * 2, $height * 2, $resize);
+            $mainImageUrl = $placeholderImageUrl . ' 1x, ' . $imageUrl . ' 2x';
+        }
+
         $html .= '<img alt="' . $alt . '" title="' . $title . '" class="' . $class . '" src="' . $placeholderImageUrl . '" data-src="' . $mainImageUrl . '" />';
         $html .= '</picture>';
 
