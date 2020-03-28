@@ -90,6 +90,7 @@ class ImageResize implements ArgumentInterface
         /** @var string $placeholderImageUrl */
         $placeholderImageUrl = $this->resize->resizeAndGetUrl($placeholderImagePath, $width, $height, $resize);
 
+        /** @var string $mainImageUrl */
         $mainImageUrl = $this->resize->resizeAndGetUrl($imagePath, $width, $height, $resize);
         if ($mainImageUrl === '') {
             return '';
@@ -110,12 +111,14 @@ class ImageResize implements ArgumentInterface
             }
         }
 
+        /** @var string $mainSrcset */
+        $mainSrcset = '';
         if ($retina) {
-            $imageUrl = $this->resize->resizeAndGetUrl($imagePath, $width * 2, $height * 2, $resize);
-            $mainImageUrl = $placeholderImageUrl . ' 1x, ' . $imageUrl . ' 2x';
+            $imageUrl   = $this->resize->resizeAndGetUrl($imagePath, $width * 2, $height * 2, $resize);
+            $mainSrcset = $mainImageUrl . ' 1x, ' . $imageUrl . ' 2x';
         }
 
-        $html .= '<img alt="' . $alt . '" title="' . $title . '" class="' . $class . '" src="' . $placeholderImageUrl . '" data-src="' . $mainImageUrl . '" />';
+        $html .= '<img alt="' . $alt . '" title="' . $title . '" class="' . $class . '" src="' . $placeholderImageUrl . '" data-src="' . $mainImageUrl . '"  data-srcset="' . $mainSrcset . '"/>';
         $html .= '</picture>';
 
         return $html;
