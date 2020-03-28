@@ -7,11 +7,12 @@ namespace Web200\ImageResize\Model;
 use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Filesystem;
+use Magento\Framework\Filesystem\Io\File;
 use Magento\Framework\Image\AdapterFactory as imageAdapterFactory;
 use Magento\Framework\UrlInterface;
 use Magento\Store\Model\StoreManagerInterface;
-use Magento\Framework\Filesystem\Io\File;
 use Psr\Log\LoggerInterface;
+use Web200\ImageResize\Provider\Config;
 
 /**
  * Class Resize
@@ -71,22 +72,22 @@ class Resize
      * - backgroundColor[null]: Default white
      */
     protected $defaultSettings = [
-        'constrainOnly' => true,
-        'keepAspectRatio' => true,
+        'constrainOnly'    => true,
+        'keepAspectRatio'  => true,
         'keepTransparency' => true,
-        'keepFrame' => false,
-        'backgroundColor' => null,
-        'quality' => 85
+        'keepFrame'        => false,
+        'backgroundColor'  => null,
+        'quality'          => 85
     ];
     /**
      * @var array
      */
     protected $subPathSettingsMapping = [
-        'constrainOnly' => 'co',
-        'keepAspectRatio' => 'ar',
+        'constrainOnly'    => 'co',
+        'keepAspectRatio'  => 'ar',
         'keepTransparency' => 'tr',
-        'keepFrame' => 'fr',
-        'backgroundColor' => 'bc',
+        'keepFrame'        => 'fr',
+        'backgroundColor'  => 'bc',
     ];
     /**
      * @var File
@@ -96,6 +97,12 @@ class Resize
      * @var LoggerInterface
      */
     protected $logger;
+    /**
+     * Config
+     *
+     * @var Config $config
+     */
+    protected $config;
 
     /**
      * Resizer constructor.
@@ -105,19 +112,22 @@ class Resize
      * @param StoreManagerInterface $storeManager
      * @param File                  $fileIo
      * @param LoggerInterface       $logger
+     * @param Config                $config
      */
     public function __construct(
         Filesystem $filesystem,
         imageAdapterFactory $imageAdapterFactory,
         StoreManagerInterface $storeManager,
         File $fileIo,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        Config $config
     ) {
         $this->imageAdapterFactory = $imageAdapterFactory;
         $this->mediaDirectoryRead  = $filesystem->getDirectoryRead(DirectoryList::MEDIA);
         $this->storeManager        = $storeManager;
         $this->fileIo              = $fileIo;
         $this->logger              = $logger;
+        $this->config              = $config;
     }
 
     /**
@@ -128,6 +138,7 @@ class Resize
      * @param null|int $width
      * @param null|int $height
      * @param array    $resizeSettings
+     *
      * @return string
      */
     public function resizeAndGetUrl(string $imagePath, $width, $height, array $resizeSettings = []): string
@@ -136,7 +147,7 @@ class Resize
         $resultUrl = '';
         try {
             if (strpos($imagePath, 'http') !== 0) {
-                $this->relativeFilename = $imagePath;
+                $this->relativeFilename = str_replace($this->mediaDirectoryRead->getAbsolutePath(), '', $imagePath);
             } else {
                 // Set $resultUrl with $fileUrl to return this one in case the resize fails.
                 $resultUrl = $imagePath;
@@ -179,7 +190,14 @@ class Resize
     protected function initResizeSettings(array $resizeSettings): void
     {
         // Init resize settings with default
-        $this->resizeSettings = $this->defaultSettings;
+        $this->resizeSettings = [
+            'constrainOnly'    => $this->config->getDefaultConstrainOnly(),
+            'keepAspectRatio'  => $this->config->getDefaultKeepAspectRatio(),
+            'keepTransparency' => $this->config->getDefaultKeepTransparency(),
+            'keepFrame'        => $this->config->getDefaultKeepFrame(),
+            'backgroundColor'  => $this->config->getBackgroundColor(),
+            'quality'          => $this->config->getQuality()
+        ];
         // Override resizeSettings only if key matches with existing settings
         foreach ($resizeSettings as $key => $value) {
             if (array_key_exists($key, $this->resizeSettings)) {
@@ -192,6 +210,7 @@ class Resize
      * Init relative filename from original image url to resize
      *
      * @param string $imageUrl
+     *
      * @return bool|mixed|string
      * @throws NoSuchEntityException
      */
@@ -325,6 +344,7 @@ class Resize
      * Detects animated GIF from given file pointer resource or filename.
      *
      * @param resource|string $file File pointer resource or filename
+     *
      * @return bool
      */
     protected function isAnimatedGif($file): bool

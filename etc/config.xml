@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <w200_image_resize>
+            <default>
+                <constrain_only>1</constrain_only>
+                <keep_aspect_ratio>1</keep_aspect_ratio>
+                <keep_transparency>1</keep_transparency>
+                <keep_frame>0</keep_frame>
+                <background_color>255,255,255</background_color>
+                <quality>85</quality>
+            </default>
+        </w200_image_resize>
+    </default>
+</config>

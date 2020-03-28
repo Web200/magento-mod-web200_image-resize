@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <tab id="web200_image_resize" translate="label" sortOrder="100000" class="web200-tab">
+            <label>Image Resize</label>
+        </tab>
+        <section id="w200_image_resize" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Image Resize</label>
+            <tab>web200_image_resize</tab>
+            <resource>Web200_ImageResize::config</resource>
+            <group id="default" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Default Option</label>
+                <field id="constrain_only" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Constrain Only</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Guarantee, that image picture will not be bigger, than it was. It is false by default.</comment>
+                </field>
+                <field id="keep_aspect_ratio" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Keep Aspect Ratio</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Guarantee, that image picture width/height will not be distorted. It is true by default.</comment>
+                </field>
+                <field id="keep_transparency" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Keep Transparency</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Guarantee, that image will not lose transparency if any. It is true by default.</comment>
+                </field>
+                <field id="keep_frame" translate="label" type="select" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Keep Frame</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Guarantee, that image will have dimensions, set in $width/$height. Not applicable, if keepAspectRatio(false).</comment>
+                </field>
+                <field id="background_color" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Background Color</label>
+                    <comment>0,0,0 => Black 255,255,255 => White</comment>
+                </field>
+                <field id="quality" translate="label" type="text" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Quality</label>
+                    <comment>Value from 70 to 100</comment>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>
