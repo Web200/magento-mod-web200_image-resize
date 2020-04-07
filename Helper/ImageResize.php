@@ -2,38 +2,43 @@
 
 declare(strict_types=1);
 
-namespace Web200\ImageResize\ViewModel;
+namespace Web200\ImageResize\Helper;
 
-use Magento\Framework\View\Element\Block\ArgumentInterface;
+use Magento\Framework\App\Helper\AbstractHelper;
+use Magento\Framework\App\Helper\Context;
 use Web200\ImageResize\Model\Resize;
 
 /**
  * Class ImageResize
  *
- * @package   Web200\ImageResize\ViewModel
+ * @package   Web200\ImageResize\Helper
  * @author    Web200 <contact@web200.fr>
  * @copyright 2020 Web200
  * @license   https://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link      https://www.web200.fr/
  */
-class ImageResize implements ArgumentInterface
+class ImageResize extends AbstractHelper
 {
     /**
-     * Description $resize field
+     * Resize
      *
-     * @var Resizer $resize
+     * @var Resize $resize
      */
     protected $resize;
 
     /**
      * ImageResize constructor.
      *
-     * @param Resize $resize
+     * @param Resize  $resize
+     * @param Context $context
      */
     public function __construct(
-        Resize $resize
+        Resize $resize,
+        Context $context
     ) {
-        $this->resize = $resize;
+        parent::__construct($context);
+
+        $this->resize  = $resize;
     }
 
     /**

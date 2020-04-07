@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Web200\ImageResize\ViewModel;
 
 use Magento\Framework\View\Element\Block\ArgumentInterface;
-use Web200\ImageResize\Model\Resize;
+use Web200\ImageResize\Model\Display;
 
 /**
- * Class ImageResize
+ * Class ImageDisplay
  *
  * @package   Web200\ImageResize\ViewModel
  * @author    Web200 <contact@web200.fr>
@@ -16,33 +16,33 @@ use Web200\ImageResize\Model\Resize;
  * @license   https://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link      https://www.web200.fr/
  */
-class ImageResize implements ArgumentInterface
+class ImageDisplay implements ArgumentInterface
 {
     /**
-     * Description $resize field
+     * Display
      *
-     * @var Resizer $resize
+     * @var Display $display
      */
-    protected $resize;
+    protected $display;
 
     /**
-     * ImageResize constructor.
+     * ImageDisplay constructor.
      *
-     * @param Resize $resize
+     * @param Display $display
      */
     public function __construct(
-        Resize $resize
+        Display $display
     ) {
-        $this->resize = $resize;
+        $this->display = $display;
     }
 
     /**
-     * Get resize
+     * Get display
      *
-     * @return Resize
+     * @return Display
      */
-    public function getResize(): Resize
+    public function getDisplay(): Display
     {
-        return $this->resize;
+        return $this->display;
     }
 }
