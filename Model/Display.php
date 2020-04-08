@@ -102,7 +102,7 @@ class Display
         /** @var string $mainImageUrl */
         $mainImageUrl = $this->resize->resizeAndGetUrl($imagePath, $width, $height, $resize);
         if ($mainImageUrl === '') {
-            $imagePath = $placeholderImageUrl;
+            $imagePath = $placeholderImagePath;
         }
 
         if (is_array($breakpoints) && !empty($breakpoints)) {
