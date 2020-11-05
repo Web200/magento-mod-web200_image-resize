@@ -26,13 +26,13 @@ class Display
      */
     protected $placeholderFactory;
     /**
-     * resize
+     * Resize
      *
      * @var Resize $resize
      */
     protected $resize;
     /**
-     * filesystem
+     * Filesystem
      *
      * @var Filesystem $filesystem
      */
@@ -94,6 +94,8 @@ class Display
         /** @var string $imagePath */
         /** @var string $html */
         $html = '<picture>';
+        /** @var bool $placeholder */
+        $placeholder = (bool)($params['placeholder'] ?? true);
         /** @var string $placeholderImagePath */
         $placeholderImagePath = $this->placeholderFactory->create(['type' => 'image'])->getPath();
         /** @var string $placeholderImageUrl */
@@ -127,7 +129,7 @@ class Display
             $mainSrcset = $mainImageUrl . ' 1x, ' . $imageUrl . ' 2x';
         }
 
-        $html .= '<img alt="' . $alt . '" title="' . $title . '" class="' . $class . '" src="' . $placeholderImageUrl . '" data-src="' . $mainImageUrl . '"  data-srcset="' . $mainSrcset . '"/>';
+        $html .= '<img alt="' . $alt . '" title="' . $title . '" class="' . $class . '" '.($placeholder ? '  src="' . $placeholderImageUrl . '"' : '' ).' data-src="' . $mainImageUrl . '"  data-srcset="' . $mainSrcset . '"/>';
         $html .= '</picture>';
 
         return $html;
