@@ -40,6 +40,6 @@ class Cache
      */
     public function clearResizedImagesCache(): void
     {
-        $this->mediaDirectory->delete(Resizer::IMAGE_RESIZE_CACHE_DIR);
+        $this->mediaDirectory->delete(Resize::IMAGE_RESIZE_CACHE_DIR);
     }
 }

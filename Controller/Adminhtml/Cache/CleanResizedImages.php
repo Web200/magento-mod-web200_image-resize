@@ -62,7 +62,7 @@ class CleanResizedImages extends MagentoAdminCache
     public function execute(): Redirect
     {
         try {
-            $this->resizerCache->clearResizedImagesCache();
+            $this->resizeCache->clearResizedImagesCache();
             $this->_eventManager->dispatch('web200_imageresize_clean_images_cache_after');
             $this->messageManager->addSuccessMessage(__('The resized images cache was cleaned.'));
         } catch (LocalizedException $e) {
