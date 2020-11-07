@@ -1,5 +1,3 @@
-
-
 # Magento 2 Image Resize
 
 Magento 2 Module to add simple image resizing capabilities in all blocks and .phtml templates

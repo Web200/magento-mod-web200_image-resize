@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Web200\ImageResize\Model;
 
+use Magento\Framework\App\CacheInterface;
 use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\Exception\FileSystemException;
 use Magento\Framework\Filesystem;
+use Magento\Framework\Filesystem\Directory\WriteInterface;
 
 /**
  * Class Cache
@@ -20,18 +22,27 @@ use Magento\Framework\Filesystem;
 class Cache
 {
     /**
-     * @var Filesystem\Directory\WriteInterface
+     * @var WriteInterface $mediaDirectory
      */
     protected $mediaDirectory;
+    /**
+     * @var CacheInterface $cache
+     */
+    protected $cache;
 
     /**
      * Cache constructor.
      *
-     * @param Filesystem $filesystem
+     * @param Filesystem     $filesystem
+     * @param CacheInterface $cache
+     *
      * @throws FileSystemException
      */
-    public function __construct(Filesystem $filesystem)
-    {
+    public function __construct(
+        Filesystem $filesystem,
+        CacheInterface $cache
+    ) {
+        $this->cache          = $cache;
         $this->mediaDirectory = $filesystem->getDirectoryWrite(DirectoryList::MEDIA);
     }
 
@@ -40,6 +51,7 @@ class Cache
      */
     public function clearResizedImagesCache(): void
     {
+        $this->cache->clean([Resize::CACHE_TAG_IDENTIFIER]);
         $this->mediaDirectory->delete(Resize::IMAGE_RESIZE_CACHE_DIR);
     }
 }

@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Web200\ImageResize\Model;
 
+use Magento\Framework\App\CacheInterface;
 use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Filesystem;
+use Magento\Framework\Filesystem\Directory\WriteInterface;
 use Magento\Framework\Filesystem\Io\File;
 use Magento\Framework\Image\AdapterFactory as imageAdapterFactory;
 use Magento\Framework\UrlInterface;
@@ -26,6 +28,10 @@ use Web200\ImageResize\Provider\Config;
 class Resize
 {
     /**
+     * constant CACHE_TAG_IDENTIFIER
+     */
+    public const CACHE_TAG_IDENTIFIER = 'web200_imageresize';
+    /**
      * constant IMAGE_RESIZE_DIR
      */
     public const IMAGE_RESIZE_DIR = 'web200_imageresize';
@@ -34,31 +40,31 @@ class Resize
      */
     public const IMAGE_RESIZE_CACHE_DIR = self::IMAGE_RESIZE_DIR . '/' . DirectoryList::CACHE;
     /**
-     * @var imageAdapterFactory
+     * @var imageAdapterFactory $imageAdapterFactory
      */
     protected $imageAdapterFactory;
     /**
-     * @var array
+     * @var string[] $resizeSettings
      */
     protected $resizeSettings = [];
     /**
-     * @var string
+     * @var string $relativeFilename
      */
     protected $relativeFilename;
     /**
-     * @var int
+     * @var int $width
      */
     protected $width;
     /**
-     * @var int
+     * @var int $height
      */
     protected $height;
     /**
-     * @var Filesystem\Directory\WriteInterface
+     * @var WriteInterface $mediaDirectoryRead
      */
     protected $mediaDirectoryRead;
     /**
-     * @var StoreManagerInterface
+     * @var StoreManagerInterface $storeManager
      */
     protected $storeManager;
     /**
@@ -80,7 +86,7 @@ class Resize
         'quality'          => 85
     ];
     /**
-     * @var array
+     * @var string[] $subPathSettingsMapping
      */
     protected $subPathSettingsMapping = [
         'constrainOnly'    => 'co',
@@ -90,22 +96,24 @@ class Resize
         'backgroundColor'  => 'bc',
     ];
     /**
-     * @var File
+     * @var File $fileIo
      */
     protected $fileIo;
     /**
-     * @var LoggerInterface
+     * @var LoggerInterface $logger
      */
     protected $logger;
     /**
-     * Config
-     *
      * @var Config $config
      */
     protected $config;
+    /**
+     * @var CacheInterface $cache
+     */
+    protected $cache;
 
     /**
-     * Resizer constructor.
+     * Resize constructor.
      *
      * @param Filesystem            $filesystem
      * @param ImageAdapterFactory   $imageAdapterFactory
@@ -113,6 +121,7 @@ class Resize
      * @param File                  $fileIo
      * @param LoggerInterface       $logger
      * @param Config                $config
+     * @param CacheInterface        $cache
      */
     public function __construct(
         Filesystem $filesystem,
@@ -120,7 +129,8 @@ class Resize
         StoreManagerInterface $storeManager,
         File $fileIo,
         LoggerInterface $logger,
-        Config $config
+        Config $config,
+        CacheInterface $cache
     ) {
         $this->imageAdapterFactory = $imageAdapterFactory;
         $this->mediaDirectoryRead  = $filesystem->getDirectoryRead(DirectoryList::MEDIA);
@@ -128,6 +138,7 @@ class Resize
         $this->fileIo              = $fileIo;
         $this->logger              = $logger;
         $this->config              = $config;
+        $this->cache = $cache;
     }
 
     /**
@@ -143,6 +154,12 @@ class Resize
      */
     public function resizeAndGetUrl(string $imagePath, $width, $height, array $resizeSettings = []): string
     {
+        /** @var string $cacheKey */
+        $cacheKey = md5($imagePath . '-' . $width . '-' . $height . '-' . json_encode($resizeSettings));
+        if ($resultUrl = $this->cache->load($cacheKey)) {
+            return $resultUrl;
+        }
+
         /** @var string $resultUrl */
         $resultUrl = '';
         try {
@@ -175,6 +192,7 @@ class Resize
             if ($resizedUrl) {
                 $resultUrl = $resizedUrl;
             }
+            $this->cache->save($resultUrl, $cacheKey, [self::CACHE_TAG_IDENTIFIER]);
         } catch (\Exception $e) {
             $this->logger->addError("Web200_ImageResize: could not resize image: \n" . $e->getMessage());
         }
