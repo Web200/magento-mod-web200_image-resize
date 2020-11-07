@@ -26,13 +26,13 @@ class Display
      */
     protected $placeholderFactory;
     /**
-     * resize
+     * Resize
      *
      * @var Resize $resize
      */
     protected $resize;
     /**
-     * filesystem
+     * Filesystem
      *
      * @var Filesystem $filesystem
      */
