@@ -12,6 +12,7 @@ $ composer require "web200/magento-mod-web200_image-resize":"*"
 
 ## Usage
 
+### ViewModel
 Layout
 ```xml
 <?xml version="1.0"?>
@@ -41,9 +42,24 @@ phtml
 <?php $imageResize->getResize()->resizeAndGetUrl($originalImage, $width, $height, $resizeSettings);
 ```
 
+### Helper
+
+phtml
+```php
+<?php /** @var \Web200\ImageResize\Helper\Resize $resizeHelper */ ?>
+<?php $resizeHelper = $this->helper(\Web200\ImageResize\Helper\Resize::class) ?>
+<?php 
+/**
+* $originalImage can be a full url image : https://mywebsite.com/pub/media/catalog/product/a/b/001.jpg
+* or relative media path : catalog/product/a/b/001.jpg
+*/
+?>
+<?php $resizeHelper->getResize()->resizeAndGetUrl($originalImage, $width, $height, $resizeSettings);
+```
+
 ## Resize Settings
 
-The folowing is a list of the resize settings that can be set directory to $resizeSettings parameter or configurate in Store > Configuration > Image Resize
+The folowing is a list of the resize settings that can be set directory to $resizeSettings parameter
 
 | Name | Default | Type |
 | --- | --- | --- |
@@ -60,6 +76,10 @@ The folowing is a list of the resize settings that can be set directory to $resi
 | watermark['y'] | null | int |
 | watermark['opacity'] | null | string |
 | watermark['title'] | null | string |
+
+or configurate in Store > Configuration > Image Resize
+
+![Default resize configuration](docs/img/configuration.png "Default resize configuration")
 
 ## Cache
 
