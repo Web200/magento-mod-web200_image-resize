@@ -38,8 +38,28 @@ phtml
 * or relative media path : catalog/product/a/b/001.jpg
 */
 ?>
-<?php $imageResize->getResize()->resizeAndGetUrl($originalImage, $width, $height, [$resizeSettings])
+<?php $imageResize->getResize()->resizeAndGetUrl($originalImage, $width, $height, $resizeSettings);
 ```
+
+## Resize Settings
+
+The folowing is a list of the resize settings that can be set directory to $resizeSettings parameter or configurate in Store > Configuration > Image Resize
+
+| Name | Default | Type |
+| --- | --- | --- |
+| constrainOnly | true | Boolean |
+| keepAspectRatio | true | Boolean |
+| keepTransparency | true | Boolean |
+| keepFrame | false | Boolean |
+| backgroundColor | null | Array with RGB values ([255,255,255]) |
+| quality | 85 | Number 1-100 |
+| --- | --- | --- |
+| watermark | null | array |
+| watermark['imagepath'] | null | string |
+| watermark['x'] | null | int |
+| watermark['y'] | null | int |
+| watermark['opacity'] | null | string |
+| watermark['title'] | null | string |
 
 ## Cache
 
