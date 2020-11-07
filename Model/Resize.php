@@ -334,7 +334,7 @@ class Resize
                 $this->resizeSettings['watermark']['x'] ?? null,
                 $this->resizeSettings['watermark']['y'] ?? null,
                 $this->resizeSettings['watermark']['opacity'] ?? null,
-                $this->resizeSettings['watermark']['tile'] ?? null
+                $this->resizeSettings['watermark']['title'] ?? null
             );
         }
         $imageAdapter->constrainOnly($this->resizeSettings['constrainOnly']);
