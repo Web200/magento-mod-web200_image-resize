@@ -22,10 +22,14 @@ use Magento\Framework\Filesystem\Directory\WriteInterface;
 class Cache
 {
     /**
+     * Write interface
+     *
      * @var WriteInterface $mediaDirectory
      */
     protected $mediaDirectory;
     /**
+     * Cache interface
+     *
      * @var CacheInterface $cache
      */
     protected $cache;

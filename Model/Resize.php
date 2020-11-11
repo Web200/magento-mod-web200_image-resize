@@ -29,41 +29,61 @@ class Resize
 {
     /**
      * constant CACHE_TAG_IDENTIFIER
+     *
+     * @var string CACHE_TAG_IDENTIFIER
      */
     public const CACHE_TAG_IDENTIFIER = 'web200_imageresize';
     /**
      * constant IMAGE_RESIZE_DIR
+     *
+     * @var string IMAGE_RESIZE_DIR
      */
     public const IMAGE_RESIZE_DIR = 'web200_imageresize';
     /**
      * constant IMAGE_RESIZE_CACHE_DIR
+     *
+     * @var string IMAGE_RESIZE_CACHE_DIR
      */
     public const IMAGE_RESIZE_CACHE_DIR = self::IMAGE_RESIZE_DIR . '/' . DirectoryList::CACHE;
     /**
+     * Image adapter factory
+     *
      * @var imageAdapterFactory $imageAdapterFactory
      */
     protected $imageAdapterFactory;
     /**
+     * Resize settings
+     *
      * @var string[] $resizeSettings
      */
     protected $resizeSettings = [];
     /**
+     * Relative filename
+     *
      * @var string $relativeFilename
      */
     protected $relativeFilename;
     /**
+     * Width
+     *
      * @var int $width
      */
     protected $width;
     /**
+     * Height
+     *
      * @var int $height
      */
     protected $height;
     /**
+     * Write interface
+     *
      * @var WriteInterface $mediaDirectoryRead
      */
     protected $mediaDirectoryRead;
     /**
+     * Store manager interface
+     *
      * @var StoreManagerInterface $storeManager
      */
     protected $storeManager;
@@ -86,6 +106,8 @@ class Resize
         'quality'          => 85
     ];
     /**
+     * Sub path settings mapping
+     *
      * @var string[] $subPathSettingsMapping
      */
     protected $subPathSettingsMapping = [
@@ -96,21 +118,35 @@ class Resize
         'backgroundColor'  => 'bc',
     ];
     /**
+     * File
+     *
      * @var File $fileIo
      */
     protected $fileIo;
     /**
+     * Logger interface
+     *
      * @var LoggerInterface $logger
      */
     protected $logger;
     /**
+     * Config
+     *
      * @var Config $config
      */
     protected $config;
     /**
+     * Cache
+     *
      * @var CacheInterface $cache
      */
     protected $cache;
+    /**
+     * Webp convertor
+     *
+     * @var WebpConvertor $webpConvertor
+     */
+    protected $webpConvertor;
 
     /**
      * Resize constructor.
@@ -122,6 +158,7 @@ class Resize
      * @param LoggerInterface       $logger
      * @param Config                $config
      * @param CacheInterface        $cache
+     * @param WebpConvertor         $webpConvertor
      */
     public function __construct(
         Filesystem $filesystem,
@@ -130,7 +167,8 @@ class Resize
         File $fileIo,
         LoggerInterface $logger,
         Config $config,
-        CacheInterface $cache
+        CacheInterface $cache,
+        WebpConvertor $webpConvertor
     ) {
         $this->imageAdapterFactory = $imageAdapterFactory;
         $this->mediaDirectoryRead  = $filesystem->getDirectoryRead(DirectoryList::MEDIA);
@@ -138,7 +176,8 @@ class Resize
         $this->fileIo              = $fileIo;
         $this->logger              = $logger;
         $this->config              = $config;
-        $this->cache = $cache;
+        $this->cache               = $cache;
+        $this->webpConvertor       = $webpConvertor;
     }
 
     /**
@@ -192,6 +231,7 @@ class Resize
             if ($resizedUrl) {
                 $resultUrl = $resizedUrl;
             }
+
             $this->cache->save($resultUrl, $cacheKey, [self::CACHE_TAG_IDENTIFIER]);
         } catch (\Exception $e) {
             $this->logger->addError("Web200_ImageResize: could not resize image: \n" . $e->getMessage());
@@ -346,7 +386,7 @@ class Resize
 
         $imageAdapter = $this->imageAdapterFactory->create();
         $imageAdapter->open($this->getAbsolutePathOriginal());
-        if ($this->resizeSettings['watermark'] && file_exists($this->resizeSettings['watermark']['imagePath'])) {
+        if (isset($this->resizeSettings['watermark']) && $this->resizeSettings['watermark'] && file_exists($this->resizeSettings['watermark']['imagePath'])) {
             $imageAdapter->watermark(
                 $this->resizeSettings['watermark']['imagePath'],
                 $this->resizeSettings['watermark']['x'] ?? null,
@@ -363,6 +403,10 @@ class Resize
         $imageAdapter->quality($this->resizeSettings['quality']);
         $imageAdapter->resize($this->width, $this->height);
         $imageAdapter->save($this->getAbsolutePathResized());
+
+        if ($this->config->isWebpEnabled()) {
+            $this->webpConvertor->convert($this->getAbsolutePathResized());
+        }
 
         return true;
     }

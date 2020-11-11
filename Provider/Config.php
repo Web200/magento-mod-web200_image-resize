@@ -55,7 +55,25 @@ class Config
      */
     public const QUALITY = 'w200_image_resize/default/quality';
     /**
-     * Description $scopeConfig field
+     * Webp enabled
+     *
+     * @var string WEBP_ENABLED
+     */
+    public const WEBP_ENABLED = 'w200_image_resize/webp/enabled';
+    /**
+     * Webp quality
+     *
+     * @var string WEBP_QUALITY
+     */
+    public const WEBP_QUALITY = 'w200_image_resize/webp/quality';
+    /**
+     * Webp converter
+     *
+     * @var string WEBP_CONVERTER
+     */
+    public const WEBP_CONVERTER = 'w200_image_resize/webp/converter';
+    /**
+     * Scope config interface
      *
      * @var ScopeConfigInterface $scopeConfig
      */
@@ -185,5 +203,59 @@ class Config
         }
 
         return $quality;
+    }
+
+    /**
+     * Is webp enabled
+     *
+     * @param mixed $store
+     *
+     * @return bool
+     */
+    public function isWebpEnabled($store = null): bool
+    {
+        return (bool)$this->scopeConfig->getValue(
+            self::WEBP_ENABLED,
+            ScopeInterface::SCOPE_STORES,
+            $store
+        );
+    }
+
+    /**
+     * Get webp quality
+     *
+     * @param mixed $store
+     *
+     * @return int
+     */
+    public function getWebpQuality($store = null): int
+    {
+        $quality = (int)$this->scopeConfig->getValue(
+            self::WEBP_QUALITY,
+            ScopeInterface::SCOPE_STORES,
+            $store
+        );
+
+        if ($quality < 70 || $quality > 100) {
+            $quality = 70;
+        }
+
+        return $quality;
+    }
+
+    /**
+     * Get webp converter
+     *
+     * @param mixed $store
+     *
+     * @return string
+     */
+    public function getWebpConverter($store = null): string
+    {
+        return (string)$this->scopeConfig->getValue(
+            self::WEBP_CONVERTER,
+            ScopeInterface::SCOPE_STORES,
+            $store
+        );
     }
 }

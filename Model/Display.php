@@ -7,6 +7,7 @@ namespace Web200\ImageResize\Model;
 use Magento\Catalog\Model\View\Asset\PlaceholderFactory;
 use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\Filesystem;
+use Web200\ImageResize\Provider\Config;
 
 /**
  * Class Display
@@ -37,6 +38,18 @@ class Display
      * @var Filesystem $filesystem
      */
     protected $filesystem;
+    /**
+     * Config
+     *
+     * @var Config $config
+     */
+    protected $config;
+    /**
+     * Webp convertor
+     *
+     * @var WebpConvertor $webpConvertor
+     */
+    protected $webpConvertor;
 
     /**
      * Display constructor.
@@ -44,15 +57,21 @@ class Display
      * @param Resize             $resize
      * @param PlaceholderFactory $placeholderFactory
      * @param Filesystem         $filesystem
+     * @param Config             $config
+     * @param WebpConvertor      $webpConvertor
      */
     public function __construct(
         Resize $resize,
         PlaceholderFactory $placeholderFactory,
-        Filesystem $filesystem
+        Filesystem $filesystem,
+        Config $config,
+        WebpConvertor $webpConvertor
     ) {
         $this->placeholderFactory = $placeholderFactory;
         $this->resize             = $resize;
         $this->filesystem         = $filesystem;
+        $this->config             = $config;
+        $this->webpConvertor      = $webpConvertor;
     }
 
     /**
@@ -113,9 +132,11 @@ class Display
             foreach ($breakpoints as $breakpoint => [$bpWidth, $bpHeight]) {
                 $html     .= '<source media="(min-width: ' . $breakpoint . 'px)" data-srcset="';
                 $imageUrl = $this->resize->resizeAndGetUrl($imagePath, $bpWidth, $bpHeight, $resize);
+                $imageUrl = $this->getWebpImage($imageUrl);
                 $html     .= $imageUrl;
                 if ($retina) {
                     $imageUrl = $this->resize->resizeAndGetUrl($imagePath, $bpWidth * 2, $bpHeight * 2, $resize);
+                    $imageUrl = $this->getWebpImage($imageUrl);
                     $html     .= ' 1x, ' . $imageUrl . ' 2x';
                 }
                 $html .= '" />';
@@ -126,12 +147,32 @@ class Display
         $mainSrcset = '';
         if ($retina) {
             $imageUrl   = $this->resize->resizeAndGetUrl($imagePath, $width * 2, $height * 2, $resize);
+            $imageUrl   = $this->getWebpImage($imageUrl);
             $mainSrcset = $mainImageUrl . ' 1x, ' . $imageUrl . ' 2x';
         }
 
-        $html .= '<img alt="' . $alt . '" title="' . $title . '" class="' . $class . '" '.($placeholder ? '  src="' . $placeholderImageUrl . '"' : '' ).' data-src="' . $mainImageUrl . '"  data-srcset="' . $mainSrcset . '"/>';
+        $html .= '<img alt="' . $alt . '" title="' . $title . '" class="' . $class . '" ' . ($placeholder ? '  src="' . $placeholderImageUrl . '"' : '') . ' data-src="' . $mainImageUrl . '"  data-srcset="' . $mainSrcset . '"/>';
         $html .= '</picture>';
 
         return $html;
+    }
+
+    /**
+     * Get webp image if enabled
+     *
+     * @param $image
+     *
+     * @return string
+     */
+    protected function getWebpImage($image): string
+    {
+        if ($this->config->isWebpEnabled()) {
+            $webPImage = $this->webpConvertor->getWebPImage($image);
+            if ($webPImage !== '' && $this->webpConvertor->isWebpImageExist($webPImage)) {
+                $image = $webPImage;
+            }
+        }
+
+        return $image;
     }
 }

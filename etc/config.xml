@@ -10,6 +10,11 @@
                 <background_color>255,255,255</background_color>
                 <quality>85</quality>
             </default>
+            <webp>
+                <enabled>0</enabled>
+                <converter>gd</converter>
+                <quality>80</quality>
+            </webp>
         </w200_image_resize>
     </default>
 </config>

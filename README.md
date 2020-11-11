@@ -8,7 +8,7 @@ Magento 2 Module to add simple image resizing capabilities in all blocks and .ph
 $ composer require "web200/magento-mod-web200_image-resize":"*"
 ```
 
-## Usage
+## Simple resize image usage
 
 ### ViewModel
 Layout
@@ -54,6 +54,62 @@ phtml
 ?>
 <?php $resizeHelper->getResize()->resizeAndGetUrl($originalImage, $width, $height, $resizeSettings);
 ```
+
+
+## Advanced resize and display image usage
+
+* Display alternative image size with breakpoint / retina settings.
+* Option to display webp images, available in Store > Configuration > Image Resize.
+* In order to display images use a js library : https://github.com/verlok/vanilla-lazyload
+
+### ViewModel
+Layout
+```xml
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="header.container">
+            <block name="authlinks" template="Magento_Theme::authlinks.phtml">
+                <arguments>
+                    <argument name="image_display" xsi:type="object">Web200\ImageResize\ViewModel\ImageDisplay</argument>
+                </arguments>
+            </block>
+        </referenceContainer>
+    </body>
+</page>
+```
+
+phtml
+```php
+<?php /** @var \Web200\ImageResize\ViewModel\ImageDisplay $imageDisplay */ ?>
+<?php $imageDisplay = $block->getImageDisplay() ?>
+<?php 
+/**
+* $originalImage can be a full url image : https://mywebsite.com/pub/media/catalog/product/a/b/001.jpg
+* or relative media path : catalog/product/a/b/001.jpg
+*/
+?>
+<?php $imageDisplay->getDisplay()->getImage(
+                                      'catalog/product/a/b/001.jpg',
+                                      250,
+                                      250,
+                                      [
+                                              'title'       => $block->stripTags('Some Label'),
+                                              'retina'      => true,
+                                              'breakpoints' => ['1440' => ['325', '325'], '768' => ['250', '250'], '0' => ['150', '150']]
+                                          ]
+                                  );
+```
+
+Display in html
+```html
+<picture>
+    <source media="(min-width: 768px)" data-srcset="https://domain.com/media/web200_imageresize/cache/cms/images/97x97_co_ar_tr_fr_bc_85/empty.webp 1x, https://domain.com/media/web200_imageresize/cache/cms/images/194x194_co_ar_tr_fr_bc_85/empty.webp 2x" />
+    <source media="(min-width: 0px)" data-srcset="https://domain.com/media/web200_imageresize/cache/cms/images/44x44_co_ar_tr_fr_bc_85/empty.webp 1x, https://domain.com/media/web200_imageresize/cache/cms/images/88x88_co_ar_tr_fr_bc_85/empty.webp 2x" />
+    <img alt="Service 1" title="Service 1" class="lazy" src="https://domain.com/media/web200_imageresize/cache/catalog/product/placeholder/default/97x97_co_ar_tr_fr_bc_85/placeholder.jpg" data-src="https://domain.com/media/web200_imageresize/cache/cms/images/97x97_co_ar_tr_fr_bc_85/empty.jpg" data-srcset="https://domain.com/media/web200_imageresize/cache/cms/images/97x97_co_ar_tr_fr_bc_85/empty.jpg 1x, https://domain.com/media/web200_imageresize/cache/cms/images/194x194_co_ar_tr_fr_bc_85/empty.webp 2x"/>
+</picture>
+```
+
 
 ## Resize Settings
 
