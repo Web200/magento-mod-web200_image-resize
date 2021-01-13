@@ -135,6 +135,11 @@ or configurate in Store > Configuration > Image Resize
 
 ![Default resize configuration](docs/img/configuration.png "Default resize configuration")
 
+## SVG
+
+Authorize and sanitize SVG image upload. Disabled by default.
+You need to enable it in Store > Configuration > Image Resize.
+
 ## Cache
 
 Resized images are saved in cache to improve performance. That way, if an image was already resized, we just use the one in cache.

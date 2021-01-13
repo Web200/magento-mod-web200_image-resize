@@ -73,6 +73,12 @@ class Config
      */
     public const WEBP_CONVERTER = 'w200_image_resize/webp/converter';
     /**
+     * SVG enabled
+     *
+     * @var string SVG_ENABLED
+     */
+    public const SVG_ENABLED = 'w200_image_resize/svg/enabled';
+    /**
      * Scope config interface
      *
      * @var ScopeConfigInterface $scopeConfig
@@ -258,4 +264,21 @@ class Config
             $store
         );
     }
+
+    /**
+     * Is svg enabled
+     *
+     * @param mixed $store
+     *
+     * @return bool
+     */
+    public function isSvgEnabled($store = null): bool
+    {
+        return (bool)$this->scopeConfig->getValue(
+            self::SVG_ENABLED,
+            ScopeInterface::SCOPE_STORES,
+            $store
+        );
+    }
+
 }

@@ -217,6 +217,11 @@ class Resize
                     return $resultUrl;
                 }
             }
+            /** @var string[] $imagePathPart */
+            $imagePathPart = pathinfo($imagePath);
+            if ($imagePathPart['extension'] === 'svg') {
+                return $this->storeManager->getStore()->getBaseUrl(UrlInterface::URL_TYPE_MEDIA) . $this->relativeFilename;
+            }
             $this->initSize($width, $height);
             $this->initResizeSettings($resizeSettings);
         } catch (\Exception $e) {
@@ -363,6 +368,22 @@ class Resize
      * @throws NoSuchEntityException
      */
     protected function getResizedImageUrl(): string
+    {
+        $relativePath = $this->getRelativePathResizedImage();
+        if ($this->mediaDirectoryRead->isFile($relativePath)) {
+            return $this->storeManager->getStore()->getBaseUrl(UrlInterface::URL_TYPE_MEDIA) . $relativePath;
+        }
+
+        return '';
+    }
+
+    /**
+     * Get image url
+     *
+     * @return bool|string
+     * @throws NoSuchEntityException
+     */
+    protected function getImageUrl(): string
     {
         $relativePath = $this->getRelativePathResizedImage();
         if ($this->mediaDirectoryRead->isFile($relativePath)) {

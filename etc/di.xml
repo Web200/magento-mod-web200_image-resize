@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <!-- Authorize SVG upload -->
+    <type name="Magento\MediaStorage\Model\File\Validator\NotProtectedExtension">
+        <plugin name="web200_image_resize_authorize_svg_upload"
+                type="Web200\ImageResize\Plugin\AuthorizeSvgUpload"/>
+    </type>
+    <!-- Sanitize SVG upload -->
+    <type name="Magento\Framework\File\Uploader">
+        <plugin name="web200_image_resize_sanitize_svg_image"
+                type="Web200\ImageResize\Plugin\SanitizeSvgImage"/>
+    </type>
+</config>
