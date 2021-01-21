@@ -5,9 +5,14 @@
         <plugin name="web200_image_resize_authorize_svg_upload"
                 type="Web200\ImageResize\Plugin\AuthorizeSvgUpload"/>
     </type>
-    <!-- Sanitize SVG upload -->
+    <!-- SVG upload -->
     <type name="Magento\Framework\File\Uploader">
-        <plugin name="web200_image_resize_sanitize_svg_image"
-                type="Web200\ImageResize\Plugin\SanitizeSvgImage"/>
+        <plugin name="web200_image_upload_svg_image"
+                type="Web200\ImageResize\Plugin\UploadSvgImage"/>
+    </type>
+    <!-- Swatch SVG upload -->
+    <type name="Magento\Swatches\Helper\Media">
+        <plugin name="web200_image_resize_svg_swatch_media_helper"
+                type="Web200\ImageResize\Plugin\SvgSwatchMediaHelper" />
     </type>
 </config>
