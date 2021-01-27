@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <fieldset name="other_settings">
+        <fieldset name="head">
+            <field name="head_shortcut_icon" formElement="imageUploader">
+                <formElements>
+                    <imageUploader>
+                        <settings>
+                            <allowedExtensions>jpg jpeg gif png ico apng svg</allowedExtensions>
+                        </settings>
+                    </imageUploader>
+                </formElements>
+            </field>
+        </fieldset>
+        <fieldset name="header">
+            <field name="header_logo_src" formElement="imageUploader">
+                <formElements>
+                    <imageUploader>
+                        <settings>
+                            <allowedExtensions>jpg jpeg gif png svg</allowedExtensions>
+                        </settings>
+                    </imageUploader>
+                </formElements>
+            </field>
+        </fieldset>
+    </fieldset>
+</form>

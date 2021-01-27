@@ -140,6 +140,10 @@ or configurate in Store > Configuration > Image Resize
 Authorize and sanitize SVG image upload. Disabled by default.
 You need to enable it in Store > Configuration > Image Resize.
 
+* Add svg upload for icon and logo website
+* Add svg upload for backend configuration files
+* Add svg upload for product images
+
 ## Cache
 
 Resized images are saved in cache to improve performance. That way, if an image was already resized, we just use the one in cache.

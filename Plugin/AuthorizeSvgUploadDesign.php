@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Web200\ImageResize\Plugin;
 
-use Magento\MediaStorage\Model\File\Validator\NotProtectedExtension;
+use Magento\Theme\Model\Design\Backend\File;
 use Web200\ImageResize\Provider\Config;
 
 /**
- * Class AuthorizeSvgUpload
+ * Class AuthorizeSvgUploadDesign
  *
  * @package   Web200\ImageResize\Plugin
  * @author    Web200 <contact@web200.fr>
@@ -16,7 +16,7 @@ use Web200\ImageResize\Provider\Config;
  * @license   https://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link      https://www.web200.fr/
  */
-class AuthorizeSvgUpload
+class AuthorizeSvgUploadDesign
 {
     /**
      * Config
@@ -39,22 +39,15 @@ class AuthorizeSvgUpload
     /**
      * Authorize svg upload
      *
-     * @param NotProtectedExtension $subject
-     * @param                       $result
-     * @param Store|string|null     $store
-     *
-     * @return string[]
+     * @param File                                     $subject
+     * @param                                          $result
      */
-    public function afterGetProtectedFileExtensions(
-        NotProtectedExtension $subject,
-        $result,
-        $store = null
-    ): array {
-
+    public function afterGetAllowedExtensions(File $subject, $result)
+    {
         if (!$this->config->isSvgEnabled()) {
             return $result;
         }
-        unset($result['svg']);
+        $result[] = 'svg';
 
         return $result;
     }
