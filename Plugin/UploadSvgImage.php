@@ -43,7 +43,7 @@ class UploadSvgImage
     ) {
 
         if ($subject->getFileExtension() === 'svg' && $this->config->isSvgEnabled()) {
-            $this->sanitizeTmpImages();
+            $this->sanitizeTmpImages($subject);
             return $this->save($subject, $destinationFolder, $newFileName);
         }
 
@@ -55,18 +55,19 @@ class UploadSvgImage
      *
      * @return void
      */
-    protected function sanitizeTmpImages(): void
+    protected function sanitizeTmpImages(Uploader $uploader): void
     {
         /** @var Sanitizer $sanitizer */
         $sanitizer = new Sanitizer();
-        foreach ($_FILES as $file) {
-            if (isset($file['tmp_name'])) {
-                /** @var string $dirtySVG */
-                $dirtySVG = file_get_contents($file['tmp_name']);
-                /** @var string $cleanSVG */
-                $cleanSVG = $sanitizer->sanitize($dirtySVG);
-                file_put_contents($file['tmp_name'], $cleanSVG);
-            }
+
+        /** @var bool $tmpFile */
+        $tmpFile = $this->getTmpFile($uploader);
+        if (isset($tmpFile['tmp_name'])) {
+            /** @var string $dirtySVG */
+            $dirtySVG = file_get_contents($tmpFile['tmp_name']);
+            /** @var string $cleanSVG */
+            $cleanSVG = $sanitizer->sanitize($dirtySVG);
+            file_put_contents($tmpFile['tmp_name'], $cleanSVG);
         }
     }
 
@@ -85,8 +86,8 @@ class UploadSvgImage
         $this->validateDestination($destinationFolder);
 
         /** @var string[] $tmpFile */
-        $tmpFile = $this->getTmpFile();
-        if (!$tmpFile) {
+        $tmpFile = $this->getTmpFile($subject);
+        if (!isset($tmpFile['tmp_name'])) {
             return false;
         }
 
@@ -181,19 +182,20 @@ class UploadSvgImage
     /**
      * Get tmp file
      *
-     * @return string[]
+     * @param Uploader $uploader
+     *
+     * @return null|string[]
      */
-    protected function getTmpFile(): array
+    protected function getTmpFile(Uploader $uploader): ?array
     {
-        if (is_array($_FILES)) {
-            /** @var string[] $file */
-            $file = end($_FILES);
+        /** @var bool $closure */
+        $closure = Closure::bind(function (Uploader $uploader) {
+            return $uploader->_file;
+        }, null, Uploader::class);
 
-            return $file;
-        }
-
-        return '';
+        return $closure($uploader);
     }
+
 
     /**
      * Is enable file dispersion
