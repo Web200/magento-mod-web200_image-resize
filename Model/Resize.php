@@ -225,7 +225,7 @@ class Resize
             $this->initSize($width, $height);
             $this->initResizeSettings($resizeSettings);
         } catch (\Exception $e) {
-            $this->logger->addError("Web200_ImageResize: could not find image: \n" . $e->getMessage());
+            $this->logger->error("Web200_ImageResize: could not find image: \n" . $e->getMessage());
         }
         try {
             // Check if resized image already exists in cache
@@ -239,7 +239,7 @@ class Resize
 
             $this->cache->save($resultUrl, $cacheKey, [self::CACHE_TAG_IDENTIFIER]);
         } catch (\Exception $e) {
-            $this->logger->addError("Web200_ImageResize: could not resize image: \n" . $e->getMessage());
+            $this->logger->error("Web200_ImageResize: could not resize image: \n" . $e->getMessage());
         }
 
         return $resultUrl;
