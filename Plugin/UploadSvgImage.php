@@ -279,16 +279,30 @@ class UploadSvgImage
      *
      * @param $subject
      * @param $result
-     *
-     * @return string[]
      */
     public function afterCheckMimeType($subject, $result)
     {
-        if (!$this->config->isSvgEnabled()) {
-            return $result;
+        if ($this->config->isSvgEnabled()) {
+            $tmpFile = $this->getTmpFile($subject);
+            if (isset($tmpFile['name']) && $this->isSvgImage($tmpFile['name'])) {
+                return true;
+            }
         }
-        $result[] = 'image/svg+xml';
 
         return $result;
+    }
+
+    /**
+     * Is svg image
+     *
+     * @param string $imagePath
+     *
+     * @return bool
+     */
+    protected function isSvgImage(string $imagePath): bool
+    {
+        /** @var string  $imageParts */
+        $imageParts = pathinfo($imagePath);
+        return $imageParts['extension'] === 'svg';
     }
 }
