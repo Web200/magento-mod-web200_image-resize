@@ -273,4 +273,22 @@ class UploadSvgImage
     {
         return $this;
     }
+
+    /**
+     * Authorize svg upload
+     *
+     * @param $subject
+     * @param $result
+     *
+     * @return string[]
+     */
+    public function afterCheckMimeType($subject, $result)
+    {
+        if (!$this->config->isSvgEnabled()) {
+            return $result;
+        }
+        $result[] = 'image/svg+xml';
+
+        return $result;
+    }
 }
