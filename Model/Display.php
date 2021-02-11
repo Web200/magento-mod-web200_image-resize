@@ -110,9 +110,7 @@ class Display
         $class = isset($params['class']) ? 'lazy ' . $params['class'] : 'lazy';
         /** @var string[] $breakpoints */
         $breakpoints = $params['breakpoints'] ?? [];
-        /** @var string $imagePath */
-        /** @var string $html */
-        $html = '<picture>';
+
         /** @var bool $placeholder */
         $placeholder = (bool)($params['placeholder'] ?? true);
         /** @var string $placeholderImagePath */
@@ -120,12 +118,19 @@ class Display
         /** @var string $placeholderImageUrl */
         $placeholderImageUrl = $this->resize->resizeAndGetUrl($placeholderImagePath, $width, $height, $resize);
 
+        /** @var string $imagePath */
         /** @var string $mainImageUrl */
         $mainImageUrl = $this->resize->resizeAndGetUrl($imagePath, $width, $height, $resize);
         if ($mainImageUrl === '') {
             $imagePath = $placeholderImagePath;
         }
 
+        if ($this->isSvgImage($imagePath)) {
+            return '<img alt="' . $alt . '" title="' . $title . '" class="' . $class . '" src="' . $mainImageUrl . '"/>';
+        }
+
+        /** @var string $html */
+        $html = '<picture>';
         if (is_array($breakpoints) && !empty($breakpoints)) {
             /** @var int $bpWidth */
             /** @var int $bpHeight */
@@ -155,6 +160,20 @@ class Display
         $html .= '</picture>';
 
         return $html;
+    }
+
+    /**
+     * Is svg image
+     *
+     * @param string $imagePath
+     *
+     * @return bool
+     */
+    protected function isSvgImage(string $imagePath): bool
+    {
+        /** @var string  $imageParts */
+        $imageParts = pathinfo($imagePath);
+        return $imageParts['extension'] === 'svg';
     }
 
     /**
