@@ -3,21 +3,41 @@
     <!-- Authorize SVG upload -->
     <type name="Magento\MediaStorage\Model\File\Validator\NotProtectedExtension">
         <plugin name="web200_image_resize_authorize_svg_upload"
-                type="Web200\ImageResize\Plugin\AuthorizeSvgUpload"/>
+                type="Web200\ImageResize\Plugin\Svg\AuthorizeSvgUploadValidator"/>
+    </type>
+    <!-- Authorize SVG upload in cms-->
+    <type name="Magento\Cms\Model\Wysiwyg\Images">
+        <plugin name="web200_image_authorize_svg_upload_design"
+                type="Web200\ImageResize\Plugin\Svg\AuthorizeSvgUploadCms"/>
+    </type>
+    <!-- Authorize SVG upload in media uploader -->
+    <type name="Magento\Backend\Block\Media\Uploader">
+        <plugin name="web200_image_resize_authorize_svg_uploader"
+                type="Web200\ImageResize\Plugin\Svg\AuthorizeSvgUploader"/>
     </type>
     <!-- Authorize SVG upload in backend file-->
     <type name="Magento\Theme\Model\Design\Backend\File">
-        <plugin name="authorize_svg_upload_design"
-                type="Web200\ImageResize\Plugin\AuthorizeSvgUploadDesign"/>
-    </type>
-    <!-- SVG upload -->
-    <type name="Magento\Framework\File\Uploader">
-        <plugin name="web200_image_upload_svg_image"
-                type="Web200\ImageResize\Plugin\UploadSvgImage"/>
+        <plugin name="web200_image_resize_authorize_svg_upload_design"
+                type="Web200\ImageResize\Plugin\Svg\AuthorizeSvgUploadDesign"/>
     </type>
     <!-- Swatch SVG upload -->
     <type name="Magento\Swatches\Helper\Media">
-        <plugin name="web200_image_resize_svg_swatch_media_helper"
-                type="Web200\ImageResize\Plugin\SvgSwatchMediaHelper" />
+        <plugin name="web200_image_resize_svg_dont_generate_swatch"
+                type="Web200\ImageResize\Plugin\Svg\DontGenerateSwatch" />
+    </type>
+    <!-- Dont resize cms storage image if SVG -->
+    <type name="Magento\Cms\Model\Wysiwyg\Images\Storage">
+        <plugin name="web200_image_dont_resize_storage_image"
+                type="Web200\ImageResize\Plugin\Svg\DontResizeStorageImage"/>
+    </type>
+    <!-- Svg upload -->
+    <type name="Magento\Framework\File\Uploader">
+        <plugin name="web200_image_upload_svg_image"
+                type="Web200\ImageResize\Plugin\Svg\SanitizeSvgUpload"/>
+    </type>
+    <!-- Svg upload File Validation -->
+    <type name="Magento\Framework\Image\Adapter\AbstractAdapter">
+        <plugin name="validate_svg_file"
+                type="Web200\ImageResize\Plugin\Svg\ValidateSvgFile"/>
     </type>
 </config>
