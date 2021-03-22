@@ -37,7 +37,12 @@
     </type>
     <!-- Svg upload File Validation -->
     <type name="Magento\Framework\Image\Adapter\AbstractAdapter">
-        <plugin name="validate_svg_file"
+        <plugin name="web200_imagevalidate_svg_file"
                 type="Web200\ImageResize\Plugin\Svg\ValidateSvgFile"/>
+    </type>
+    <!-- Add default placeholder image -->
+    <type name="Magento\Catalog\Model\Config\CatalogClone\Media\Image">
+        <plugin name="web200_imageadd_default_placeholder_image"
+                type="Web200\ImageResize\Plugin\AddDefaultPlaceholderImage"/>
     </type>
 </config>

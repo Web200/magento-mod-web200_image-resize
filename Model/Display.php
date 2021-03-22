@@ -104,6 +104,8 @@ class Display
         $retina = $params['retina'] ?? false;
         /** @var string $title */
         $title = $params['title'] ?? '';
+        /** @var string $placeholderType */
+        $placeholderType = $params['placeholder_type'] ?? 'default';
         /** @var string $alt */
         $alt = $params['alt'] ?? $title;
         /** @var string $class */
@@ -114,7 +116,7 @@ class Display
         /** @var bool $placeholder */
         $placeholder = (bool)($params['placeholder'] ?? true);
         /** @var string $placeholderImagePath */
-        $placeholderImagePath = $this->placeholderFactory->create(['type' => 'image'])->getPath();
+        $placeholderImagePath = $this->placeholderFactory->create(['type' => $placeholderType])->getPath();
         /** @var string $placeholderImageUrl */
         $placeholderImageUrl = $this->resize->resizeAndGetUrl($placeholderImagePath, $width, $height, $resize);
 
@@ -123,6 +125,7 @@ class Display
         $mainImageUrl = $this->resize->resizeAndGetUrl($imagePath, $width, $height, $resize);
         if ($mainImageUrl === '') {
             $imagePath = $placeholderImagePath;
+            $mainImageUrl = $placeholderImageUrl;
         }
 
         if ($this->isSvgImage($imagePath)) {
