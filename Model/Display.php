@@ -116,11 +116,10 @@ class Display
         /** @var bool $placeholder */
         $placeholder = (bool)($params['placeholder'] ?? true);
         /** @var string $placeholderImagePath */
-        $placeholderImagePath = $this->placeholderFactory->create(['type' => $placeholderType])->getPath();
+        $placeholderImagePath = (string)$this->placeholderFactory->create(['type' => $placeholderType])->getPath();
         /** @var string $placeholderImageUrl */
         $placeholderImageUrl = $this->resize->resizeAndGetUrl($placeholderImagePath, $width, $height, $resize);
 
-        /** @var string $imagePath */
         /** @var string $mainImageUrl */
         $mainImageUrl = $this->resize->resizeAndGetUrl($imagePath, $width, $height, $resize);
         if ($mainImageUrl === '') {
@@ -176,7 +175,7 @@ class Display
     {
         /** @var string  $imageParts */
         $imageParts = pathinfo($imagePath);
-        return $imageParts['extension'] === 'svg';
+        return isset($imageParts['extension']) && $imageParts['extension'] === 'svg';
     }
 
     /**
