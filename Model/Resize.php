@@ -38,7 +38,7 @@ class Resize
      *
      * @var string IMAGE_RESIZE_DIR
      */
-    public const IMAGE_RESIZE_DIR = 'web200_imageresize';
+    public const IMAGE_RESIZE_DIR = 'imageresize';
     /**
      * constant IMAGE_RESIZE_CACHE_DIR
      *
@@ -222,6 +222,7 @@ class Resize
             if ($imagePathPart['extension'] === 'svg') {
                 return $this->storeManager->getStore()->getBaseUrl(UrlInterface::URL_TYPE_MEDIA) . $this->relativeFilename;
             }
+
             $this->initSize($width, $height);
             $this->initResizeSettings($resizeSettings);
         } catch (\Exception $e) {
@@ -394,6 +395,29 @@ class Resize
     }
 
     /**
+     * Convert png to jpg
+     *
+     * @return void
+     */
+    protected function convertPngToJpg(): void
+    {
+        $absolutePath = $this->getAbsolutePathOriginal();
+        if (preg_match('/\.png$/', $absolutePath)) {
+            $newAbsolutePath = preg_replace('/(\.png$)/', '.jpg', $absolutePath);
+            $this->relativeFilename =  preg_replace('/(\.png$)/', '.jpg', $this->relativeFilename);
+            $imageInput = imagecreatefrompng($absolutePath);
+            $width = imagesx($imageInput);
+            $height = imagesy($imageInput);
+            $imageOutput = imagecreatetruecolor($width, $height);
+            list($red, $green, $blue) = $this->resizeSettings['backgroundColor'];
+            imagefilledrectangle($imageOutput, 0, 0, $width, $height, imagecolorallocate(imagecreatetruecolor($width, $height),  $red, $green, $blue));
+            imagecopy($imageOutput, $imageInput, 0, 0, 0, 0, $width, $height);
+            imagejpeg($imageOutput, $newAbsolutePath, $this->resizeSettings['quality']);
+            imagedestroy($imageOutput);
+        }
+    }
+
+    /**
      * Resize and save new generated image
      *
      * @return bool
@@ -403,6 +427,10 @@ class Resize
     {
         if (!$this->mediaDirectoryRead->isFile($this->relativeFilename)) {
             return false;
+        }
+
+        if ($this->config->convertPngImage()){
+            $this->convertPngToJpg();
         }
 
         $imageAdapter = $this->imageAdapterFactory->create();

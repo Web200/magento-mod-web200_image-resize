@@ -9,6 +9,7 @@
                 <keep_frame>0</keep_frame>
                 <background_color>255,255,255</background_color>
                 <quality>85</quality>
+                <convert_png_image>0</convert_png_image>
             </default>
             <webp>
                 <enabled>0</enabled>
