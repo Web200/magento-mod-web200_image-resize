@@ -220,7 +220,8 @@ class Resize
             /** @var string[] $imagePathPart */
             $imagePathPart = pathinfo($imagePath);
             if ($imagePathPart['extension'] === 'svg') {
-                return $this->storeManager->getStore()->getBaseUrl(UrlInterface::URL_TYPE_MEDIA) . $this->relativeFilename;
+                $resultUrl = $this->storeManager->getStore()->getBaseUrl(UrlInterface::URL_TYPE_MEDIA) . $this->relativeFilename;
+                $this->cache->save($resultUrl, $cacheKey, [self::CACHE_TAG_IDENTIFIER]);
             }
 
             $this->initSize($width, $height);
