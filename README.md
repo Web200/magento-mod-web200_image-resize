@@ -44,8 +44,8 @@ phtml
 
 phtml
 ```php
-<?php /** @var \Web200\ImageResize\Helper\Resize $resizeHelper */ ?>
-<?php $resizeHelper = $this->helper(\Web200\ImageResize\Helper\Resize::class) ?>
+<?php /** @var \Web200\ImageResize\Helper\ImageResize $resizeHelper */ ?>
+<?php $resizeHelper = $this->helper(\Web200\ImageResize\Helper\ImageResize::class) ?>
 <?php 
 /**
 * $originalImage can be a full url image : https://mywebsite.com/pub/media/catalog/product/a/b/001.jpg
