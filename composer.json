@@ -2,7 +2,7 @@
     "name": "web200/magento-mod-web200_image-resize",
     "description": "Magento 2 Module to add simple image resizing",
     "require": {
-        "php": "^7.0",
+        "php": "^7.0|^8.0",
         "rosell-dk/webp-convert": "^2.3",
         "enshrined/svg-sanitize": "^0.13"
     },
