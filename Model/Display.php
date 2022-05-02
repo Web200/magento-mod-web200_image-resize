@@ -128,7 +128,7 @@ class Display
         }
 
         if ($this->isSvgImage($imagePath)) {
-            return '<img alt="' . $alt . '" title="' . $title . '" class="' . $class . '" src="' . $mainImageUrl . '"/>';
+            return '<picture><img alt="' . $alt . '" title="' . $title . '" class="' . $class . '" ' . ($placeholder ? '  src="' . $placeholderImageUrl . '"' : '') . '  data-src="' . $mainImageUrl . '"/></picture>';
         }
 
         /** @var string $html */
