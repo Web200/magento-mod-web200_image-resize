@@ -4,7 +4,7 @@
     "require": {
         "php": "^7.0|^8.0",
         "rosell-dk/webp-convert": "^2.3",
-        "enshrined/svg-sanitize": "^0.13"
+        "enshrined/svg-sanitize": "^0.15"
     },
     "type": "magento2-module",
     "license": [
