@@ -88,6 +88,12 @@ class Resize
      */
     protected $storeManager;
     /**
+     * Absolute original path if png to jpg is use
+     *
+     * @var string $absolutePathoriginal
+     */
+    protected $absolutePathoriginal;
+    /**
      * @var array
      *
      * - constrainOnly[true]: Guarantee, that image picture will not be bigger, than it was. It is false by default.
@@ -234,6 +240,13 @@ class Resize
             $this->logger->error("Web200_ImageResize: could not find image: \n" . $e->getMessage());
         }
         try {
+            if ($this->config->convertPngImage()) {
+                $this->absolutePathoriginal = $this->getAbsolutePathOriginal();
+                if (preg_match('/\.png$/', $this->absolutePathoriginal)) {
+                    $this->relativeFilename =  preg_replace('/(\.png$)/', '.jpg', $this->relativeFilename);
+                }
+            }
+
             // Check if resized image already exists in cache
             $resizedUrl = $this->getResizedImageUrl();
             if (!$resizedUrl && $this->resizeAndSaveImage()) {
@@ -406,11 +419,9 @@ class Resize
      */
     protected function convertPngToJpg(): void
     {
-        $absolutePath = $this->getAbsolutePathOriginal();
-        if (preg_match('/\.png$/', $absolutePath)) {
-            $newAbsolutePath = preg_replace('/(\.png$)/', '.jpg', $absolutePath);
-            $this->relativeFilename =  preg_replace('/(\.png$)/', '.jpg', $this->relativeFilename);
-            $imageInput = imagecreatefrompng($absolutePath);
+        if (preg_match('/\.png$/', $this->absolutePathoriginal)) {
+            $newAbsolutePath = preg_replace('/(\.png$)/', '.jpg', $this->absolutePathoriginal);
+            $imageInput = imagecreatefrompng($this->absolutePathoriginal);
             $width = imagesx($imageInput);
             $height = imagesy($imageInput);
             $imageOutput = imagecreatetruecolor($width, $height);
@@ -430,12 +441,15 @@ class Resize
      */
     protected function resizeAndSaveImage(): bool
     {
-        if (!$this->mediaDirectoryRead->isFile($this->relativeFilename)) {
-            return false;
-        }
-
-        if ($this->config->convertPngImage()){
+        if ($this->config->convertPngImage()) {
+            if (!$this->mediaDirectoryRead->isFile($this->absolutePathoriginal)) {
+                return false;
+            }
             $this->convertPngToJpg();
+        } else {
+            if (!$this->mediaDirectoryRead->isFile($this->relativeFilename)) {
+                return false;
+            }
         }
 
         $imageAdapter = $this->imageAdapterFactory->create();
