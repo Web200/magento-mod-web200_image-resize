@@ -219,9 +219,13 @@ class Resize
             }
             /** @var string[] $imagePathPart */
             $imagePathPart = pathinfo($imagePath);
+            if (!isset($imagePathPart['extension'])) {
+                return '';
+            }
             if ($imagePathPart['extension'] === 'svg') {
                 $resultUrl = $this->storeManager->getStore()->getBaseUrl(UrlInterface::URL_TYPE_MEDIA) . $this->relativeFilename;
                 $this->cache->save($resultUrl, $cacheKey, [self::CACHE_TAG_IDENTIFIER]);
+                return $resultUrl;
             }
 
             $this->initSize($width, $height);
@@ -241,7 +245,7 @@ class Resize
 
             $this->cache->save($resultUrl, $cacheKey, [self::CACHE_TAG_IDENTIFIER]);
         } catch (\Exception $e) {
-            $this->logger->error("Web200_ImageResize: could not resize image: \n" . $e->getMessage());
+            $this->logger->error("Web200_ImageResize: could not resize image: ".$imagePath." \n" . $e->getMessage());
         }
 
         return $resultUrl;
