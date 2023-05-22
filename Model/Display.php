@@ -139,11 +139,9 @@ class Display
             foreach ($breakpoints as $breakpoint => [$bpWidth, $bpHeight]) {
                 $html     .= '<source media="(min-width: ' . $breakpoint . 'px)" data-srcset="';
                 $imageUrl = $this->resize->resizeAndGetUrl($imagePath, $bpWidth, $bpHeight, $resize);
-                $imageUrl = $this->getWebpImage($imageUrl);
                 $html     .= $imageUrl;
                 if ($retina) {
                     $imageUrl = $this->resize->resizeAndGetUrl($imagePath, $bpWidth * 2, $bpHeight * 2, $resize);
-                    $imageUrl = $this->getWebpImage($imageUrl);
                     $html     .= ' 1x, ' . $imageUrl . ' 2x';
                 }
                 $html .= '" />';
@@ -154,7 +152,6 @@ class Display
         $mainSrcset = '';
         if ($retina) {
             $imageUrl   = $this->resize->resizeAndGetUrl($imagePath, $width * 2, $height * 2, $resize);
-            $imageUrl   = $this->getWebpImage($imageUrl);
             $mainSrcset = $mainImageUrl . ' 1x, ' . $imageUrl . ' 2x';
         }
 

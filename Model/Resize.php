@@ -389,6 +389,11 @@ class Resize
     protected function getResizedImageUrl(): string
     {
         $relativePath = $this->getRelativePathResizedImage();
+        if ($this->config->isWebpEnabled()) {
+            $relativePath = $this->webpConvertor->getWebPImage($relativePath);
+        }
+
+        $relativePath = $this->getRelativePathResizedImage();
         if ($this->mediaDirectoryRead->isFile($relativePath)) {
             return $this->storeManager->getStore()->getBaseUrl(UrlInterface::URL_TYPE_MEDIA) . $relativePath;
         }
