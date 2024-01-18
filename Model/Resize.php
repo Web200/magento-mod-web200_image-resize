@@ -391,9 +391,10 @@ class Resize
         $relativePath = $this->getRelativePathResizedImage();
         if ($this->config->isWebpEnabled()) {
             $relativePath = $this->webpConvertor->getWebPImage($relativePath);
+        } else {
+            $relativePath = $this->getRelativePathResizedImage();
         }
 
-        $relativePath = $this->getRelativePathResizedImage();
         if ($this->mediaDirectoryRead->isFile($relativePath)) {
             return $this->storeManager->getStore()->getBaseUrl(UrlInterface::URL_TYPE_MEDIA) . $relativePath;
         }
