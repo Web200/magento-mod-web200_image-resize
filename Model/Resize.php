@@ -28,6 +28,12 @@ use Web200\ImageResize\Provider\Config;
 class Resize
 {
     /**
+     * constant FORMAT_WEBP
+     *
+     * @var string FORMAT_WEBP
+     */
+    public const FORMAT_WEBP = 'webp';
+    /**
      * constant CACHE_TAG_IDENTIFIER
      *
      * @var string CACHE_TAG_IDENTIFIER
@@ -153,6 +159,10 @@ class Resize
      * @var WebpConvertor $webpConvertor
      */
     protected $webpConvertor;
+    /**
+     * @var string|null $format
+     */
+    protected ?string $format = null;
 
     /**
      * Resize constructor.
@@ -194,16 +204,19 @@ class Resize
      * @param null|int $width
      * @param null|int $height
      * @param array    $resizeSettings
+     * @param string   $format
      *
      * @return string
      */
-    public function resizeAndGetUrl(string $imagePath, $width, $height, array $resizeSettings = []): string
+    public function resizeAndGetUrl(string $imagePath, $width, $height, array $resizeSettings = [], string $format = null): string
     {
-        /** @var string $cacheKey */
         $cacheKey = md5($imagePath . '-' . $width . '-' . $height . '-' . json_encode($resizeSettings));
-        if ($resultUrl = $this->cache->load($cacheKey)) {
-            return $resultUrl;
-        }
+        //        if ($resultUrl = $this->cache->load($cacheKey)) {
+        //            return $resultUrl;
+        //        }
+
+        $this->setFormat($format);
+
 
         /** @var string $resultUrl */
         $resultUrl = '';
@@ -240,7 +253,7 @@ class Resize
             $this->logger->error("Web200_ImageResize: could not find image: \n" . $e->getMessage());
         }
         try {
-            if ($this->config->convertPngImage()) {
+            if ($this->config->convertPngImage() && $this->getFormat() !== self::FORMAT_WEBP) {
                 $this->absolutePathoriginal = $this->getAbsolutePathOriginal();
                 if (preg_match('/\.png$/', $this->absolutePathoriginal)) {
                     $this->relativeFilename =  preg_replace('/(\.png$)/', '.jpg', $this->relativeFilename);
@@ -389,12 +402,11 @@ class Resize
     protected function getResizedImageUrl(): string
     {
         $relativePath = $this->getRelativePathResizedImage();
-        if ($this->config->isWebpEnabled()) {
+        if ($this->getFormat() === self::FORMAT_WEBP) {
             $relativePath = $this->webpConvertor->getWebPImage($relativePath);
         } else {
             $relativePath = $this->getRelativePathResizedImage();
         }
-
         if ($this->mediaDirectoryRead->isFile($relativePath)) {
             return $this->storeManager->getStore()->getBaseUrl(UrlInterface::URL_TYPE_MEDIA) . $relativePath;
         }
@@ -478,7 +490,7 @@ class Resize
         $imageAdapter->resize($this->width, $this->height);
         $imageAdapter->save($this->getAbsolutePathResized());
 
-        if ($this->config->isWebpEnabled()) {
+        if ($this->getFormat() === self::FORMAT_WEBP) {
             $this->webpConvertor->convert($this->getAbsolutePathResized());
         }
 
@@ -527,5 +539,23 @@ class Resize
         fclose($filepointer);
 
         return $frames > 1;
+    }
+
+    /**
+     * @return void
+     */
+    protected function getFormat(): ?string
+    {
+        return $this->format;
+    }
+
+    /**
+     * @param null|string $format
+     *
+     * @return void
+     */
+    protected function setFormat(?string $format): void
+    {
+        $this->format = $format;
     }
 }

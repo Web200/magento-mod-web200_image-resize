@@ -50,6 +50,10 @@ class Display
      * @var WebpConvertor $webpConvertor
      */
     protected $webpConvertor;
+    /**
+     * @var bool $retina
+     */
+    protected bool $retina = false;
 
     /**
      * Display constructor.
@@ -100,8 +104,7 @@ class Display
     {
         /** @var bool $retina */
         $resize = $params['resize'] ?? [];
-        /** @var bool $retina */
-        $retina = $params['retina'] ?? false;
+        $this->setRetina($params['retina'] ?? false);
         /** @var string $title */
         $title = $params['title'] ?? '';
         /** @var string $placeholderType */
@@ -123,12 +126,12 @@ class Display
         /** @var string $mainImageUrl */
         $mainImageUrl = $this->resize->resizeAndGetUrl($imagePath, $width, $height, $resize);
         if ($mainImageUrl === '') {
-            $imagePath = $placeholderImagePath;
+            $imagePath    = $placeholderImagePath;
             $mainImageUrl = $placeholderImageUrl;
         }
 
         if ($this->isSvgImage($imagePath)) {
-            return '<picture><img alt="' . $alt . '" title="' . $title . '" class="' . $class . '" ' . ($placeholder ? '  src="' . $placeholderImageUrl . '"' : '') . '  data-src="' . $mainImageUrl . '"/></picture>';
+            return '<picture><img loading="lazy" alt="' . $alt . '" title="' . $title . '" class="' . $class . '" ' . ($placeholder ? '  src="' . $placeholderImageUrl . '"' : '') . '  width="' . $width . '" height="' . $height . '" data-src="' . $mainImageUrl . '"/></picture>';
         }
 
         /** @var string $html */
@@ -137,25 +140,26 @@ class Display
             /** @var int $bpWidth */
             /** @var int $bpHeight */
             foreach ($breakpoints as $breakpoint => [$bpWidth, $bpHeight]) {
-                $html     .= '<source media="(min-width: ' . $breakpoint . 'px)" data-srcset="';
-                $imageUrl = $this->resize->resizeAndGetUrl($imagePath, $bpWidth, $bpHeight, $resize);
-                $html     .= $imageUrl;
-                if ($retina) {
-                    $imageUrl = $this->resize->resizeAndGetUrl($imagePath, $bpWidth * 2, $bpHeight * 2, $resize);
-                    $html     .= ' 1x, ' . $imageUrl . ' 2x';
+                $html .= '<source media="(min-width: ' . $breakpoint . 'px)" data-srcset="';
+                if ($this->config->isWebpEnabled()) {
+                    $html .= $this->getBreakPointImages($imagePath, $bpWidth, $bpHeight, $resize, 'webp');
                 }
+                $html .= $this->getBreakPointImages($imagePath, $bpWidth, $bpHeight, $resize);
+
                 $html .= '" />';
             }
         }
 
         /** @var string $mainSrcset */
         $mainSrcset = '';
-        if ($retina) {
-            $imageUrl   = $this->resize->resizeAndGetUrl($imagePath, $width * 2, $height * 2, $resize);
-            $mainSrcset = $mainImageUrl . ' 1x, ' . $imageUrl . ' 2x';
+        if ($this->isRetina()) {
+            if ($this->config->isWebpEnabled()) {
+                $mainSrcset .= $this->getBreakPointImages($imagePath, $width * 2, $height *2, $resize, 'webp');
+            }
+            $mainSrcset .= $this->getBreakPointImages($imagePath, $width *2, $height *2, $resize);
         }
 
-        $html .= '<img alt="' . $alt . '" title="' . $title . '" class="' . $class . '" ' . ($placeholder ? '  src="' . $placeholderImageUrl . '"' : '') . ' data-src="' . $mainImageUrl . '"  data-srcset="' . $mainSrcset . '"/>';
+        $html .= '<img loading="lazy" alt="' . $alt . '" title="' . $title . '" class="' . $class . '" ' . ($placeholder ? '  src="' . $placeholderImageUrl . '"' : '') . ' data-src="' . $mainImageUrl . '"  data-srcset="' . $mainSrcset . '"/>';
         $html .= '</picture>';
 
         return $html;
@@ -170,9 +174,30 @@ class Display
      */
     protected function isSvgImage(string $imagePath): bool
     {
-        /** @var string  $imageParts */
+        /** @var string $imageParts */
         $imageParts = pathinfo($imagePath);
+
         return isset($imageParts['extension']) && $imageParts['extension'] === 'svg';
+    }
+
+    /**
+     * @param $imagePath
+     * @param $bpWidth
+     * @param $bpHeight
+     * @param $resize
+     *
+     * @return string
+     */
+    protected function getBreakPointImages($imagePath, $bpWidth, $bpHeight, $resize, $format = null)
+    {
+        $imageUrl = $this->resize->resizeAndGetUrl($imagePath, $bpWidth, $bpHeight, $resize, $format);
+        $html     = $imageUrl;
+        if ($this->isRetina()) {
+            $imageUrl = $this->resize->resizeAndGetUrl($imagePath, $bpWidth * 2, $bpHeight * 2, $resize, $format);
+            $html     .= ' 1x, ' . $imageUrl . ' 2x, ';
+        }
+
+        return $html;
     }
 
     /**
@@ -192,5 +217,23 @@ class Display
         }
 
         return $image;
+    }
+
+    /**
+     * @return bool
+     */
+    protected function isRetina(): bool
+    {
+        return $this->retina;
+    }
+
+    /**
+     * @param bool $retina
+     *
+     * @return void
+     */
+    protected function setRetina(bool $retina): void
+    {
+        $this->retina = $retina;
     }
 }
