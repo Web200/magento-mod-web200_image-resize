@@ -211,9 +211,9 @@ class Resize
     public function resizeAndGetUrl(string $imagePath, $width, $height, array $resizeSettings = [], string $format = null): string
     {
         $cacheKey = md5($imagePath . '-' . $width . '-' . $height . '-' . json_encode($resizeSettings));
-        //        if ($resultUrl = $this->cache->load($cacheKey)) {
-        //            return $resultUrl;
-        //        }
+        if ($resultUrl = $this->cache->load($cacheKey)) {
+            return $resultUrl;
+        }
 
         $this->setFormat($format);
 
