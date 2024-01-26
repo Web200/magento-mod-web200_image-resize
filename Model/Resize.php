@@ -100,6 +100,10 @@ class Resize
      */
     protected $absolutePathoriginal;
     /**
+     * @var array $tempCache
+     */
+    protected $tempCache = [];
+    /**
      * @var array
      *
      * - constrainOnly[true]: Guarantee, that image picture will not be bigger, than it was. It is false by default.
@@ -208,10 +212,15 @@ class Resize
      *
      * @return string
      */
-    public function resizeAndGetUrl(string $imagePath, $width, $height, array $resizeSettings = [], string $format = null): string
+    public function resizeAndGetUrl(string $imagePath, $width, $height, array $resizeSettings = [], ?string $format = null): string
     {
-        $cacheKey = md5($imagePath . '-' . $width . '-' . $height . '-' . json_encode($resizeSettings));
+        $cacheKey = md5($imagePath . '-' . $width . '-' . $height . '-' . json_encode($resizeSettings) . '-' . (string)$format);
+        if (isset($this->tempCache[$cacheKey])) {
+            return $this->tempCache[$cacheKey];
+        }
+
         if ($resultUrl = $this->cache->load($cacheKey)) {
+            $this->tempCache[$cacheKey] = $resultUrl;
             return $resultUrl;
         }
 
@@ -270,6 +279,7 @@ class Resize
             }
 
             $this->cache->save($resultUrl, $cacheKey, [self::CACHE_TAG_IDENTIFIER]);
+            $this->tempCache[$cacheKey] = $resultUrl;
         } catch (\Exception $e) {
             $this->logger->error("Web200_ImageResize: could not resize image: ".$imagePath." \n" . $e->getMessage());
         }
