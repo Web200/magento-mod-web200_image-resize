@@ -159,7 +159,7 @@ class Display
             $mainSrcset .= $this->getBreakPointImages($imagePath, $width *2, $height *2, $resize);
         }
 
-        $html .= '<img loading="lazy" alt="' . $alt . '" title="' . $title . '" class="' . $class . '" ' . ($placeholder ? '  src="' . $placeholderImageUrl . '"' : '') . ' data-src="' . $mainImageUrl . '"  data-srcset="' . $mainSrcset . '"/>';
+        $html .= '<img loading="lazy" alt="' . $alt . '" title="' . $title . '" class="' . $class . '" ' . ($placeholder ? '  src="' . $placeholderImageUrl . '"' : '') . '  width="' . $width . '" height="' . $height . '" data-src="' . $mainImageUrl . '"  data-srcset="' . $mainSrcset . '"/>';
         $html .= '</picture>';
 
         return $html;
