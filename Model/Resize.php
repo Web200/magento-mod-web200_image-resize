@@ -469,7 +469,7 @@ class Resize
      */
     protected function resizeAndSaveImage(): bool
     {
-        if ($this->config->convertPngImage()) {
+        if ($this->config->convertPngImage() && $this->getFormat() !== self::FORMAT_WEBP) {
             if (!$this->mediaDirectoryRead->isFile($this->absolutePathoriginal)) {
                 return false;
             }

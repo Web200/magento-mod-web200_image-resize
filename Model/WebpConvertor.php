@@ -10,9 +10,11 @@ use Magento\Framework\Filesystem\Directory\WriteInterface;
 use Magento\Framework\UrlInterface;
 use Magento\Framework\View\Asset\File\NotFoundException;
 use Magento\Store\Model\StoreManagerInterface;
+use Psr\Log\LoggerInterface;
 use Web200\ImageResize\Provider\Config;
 use WebPConvert\Convert\Exceptions\ConversionFailedException;
 use WebPConvert\WebPConvert;
+use Exception;
 
 /**
  * Class Convertor
@@ -43,6 +45,12 @@ class WebpConvertor
      * @var StoreManagerInterface $storeManager
      */
     protected $storeManager;
+    /**
+     * Logger
+     *
+     * @var LoggerInterface $logger
+     */
+    protected $logger;
 
     /**
      * WebpConvertor constructor.
@@ -50,15 +58,18 @@ class WebpConvertor
      * @param Config                $config
      * @param StoreManagerInterface $storeManager
      * @param Filesystem            $filesystem
+     * @param LoggerInterface       $logger
      */
     public function __construct(
         Config $config,
         StoreManagerInterface $storeManager,
-        Filesystem $filesystem
+        Filesystem $filesystem,
+        LoggerInterface $logger
     ) {
         $this->config = $config;
         $this->mediaDirectoryRead  = $filesystem->getDirectoryRead(DirectoryList::MEDIA);
         $this->storeManager = $storeManager;
+        $this->logger = $logger;
     }
 
     /**
@@ -82,6 +93,9 @@ class WebpConvertor
             }
             return $webImage;
         } catch (ConversionFailedException $exception) {
+            return '';
+        } catch (Exception $exception) {
+            $this->logger->error('Unable to resize Image : ' . $image);
             return '';
         }
     }
