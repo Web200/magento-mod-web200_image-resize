@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Web200\ImageResize\Model;
 
 use Magento\Framework\App\Filesystem\DirectoryList;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Filesystem;
 use Magento\Framework\Filesystem\Directory\WriteInterface;
 use Magento\Framework\UrlInterface;
@@ -145,7 +146,7 @@ class WebpConvertor
         return [
             'quality'     => 'auto',
             'max-quality' => $this->config->getWebpQuality(),
-            'converters'  => [$this->config->getWebpConverter()],
+            'converter'  => $this->config->getWebpConverter()
         ];
     }
 
@@ -155,6 +156,7 @@ class WebpConvertor
      * @param string $webpImageUrl
      *
      * @return bool
+     * @throws NoSuchEntityException
      */
     public function isWebpImageExist(string $webpImageUrl): bool
     {

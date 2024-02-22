@@ -55,12 +55,6 @@ class Config
      */
     public const QUALITY = 'w200_image_resize/default/quality';
     /**
-     * Convert png image
-     *
-     * @var string CONVERT_PNG_IMAGE
-     */
-    public const CONVERT_PNG_IMAGE = 'w200_image_resize/default/convert_png_image';
-    /**
      * Webp enabled
      *
      * @var string WEBP_ENABLED
@@ -115,22 +109,6 @@ class Config
     {
         return (bool)$this->scopeConfig->getValue(
             self::CONSTRAIN_ONLY,
-            ScopeInterface::SCOPE_STORES,
-            $store
-        );
-    }
-
-    /**
-     * Convert png image
-     *
-     * @param mixed $store
-     *
-     * @return bool
-     */
-    public function convertPngImage($store = null): bool
-    {
-        return (bool)$this->scopeConfig->getValue(
-            self::CONVERT_PNG_IMAGE,
             ScopeInterface::SCOPE_STORES,
             $store
         );

@@ -204,11 +204,11 @@ class Resize
      * Resized image and return url
      * - Return original image url if no success
      *
-     * @param string   $imagePath
-     * @param null|int $width
-     * @param null|int $height
-     * @param array    $resizeSettings
-     * @param string   $format
+     * @param string      $imagePath
+     * @param null|int    $width
+     * @param null|int    $height
+     * @param array       $resizeSettings
+     * @param string|null $format
      *
      * @return string
      */
@@ -262,13 +262,6 @@ class Resize
             $this->logger->error("Web200_ImageResize: could not find image: \n" . $e->getMessage());
         }
         try {
-            if ($this->config->convertPngImage() && $this->getFormat() !== self::FORMAT_WEBP) {
-                $this->absolutePathoriginal = $this->getAbsolutePathOriginal();
-                if (preg_match('/\.png$/', $this->absolutePathoriginal)) {
-                    $this->relativeFilename =  preg_replace('/(\.png$)/', '.jpg', $this->relativeFilename);
-                }
-            }
-
             // Check if resized image already exists in cache
             $resizedUrl = $this->getResizedImageUrl();
             if (!$resizedUrl && $this->resizeAndSaveImage()) {
@@ -441,27 +434,6 @@ class Resize
     }
 
     /**
-     * Convert png to jpg
-     *
-     * @return void
-     */
-    protected function convertPngToJpg(): void
-    {
-        if (preg_match('/\.png$/', $this->absolutePathoriginal)) {
-            $newAbsolutePath = preg_replace('/(\.png$)/', '.jpg', $this->absolutePathoriginal);
-            $imageInput = imagecreatefrompng($this->absolutePathoriginal);
-            $width = imagesx($imageInput);
-            $height = imagesy($imageInput);
-            $imageOutput = imagecreatetruecolor($width, $height);
-            list($red, $green, $blue) = $this->resizeSettings['backgroundColor'];
-            imagefilledrectangle($imageOutput, 0, 0, $width, $height, imagecolorallocate(imagecreatetruecolor($width, $height),  $red, $green, $blue));
-            imagecopy($imageOutput, $imageInput, 0, 0, 0, 0, $width, $height);
-            imagejpeg($imageOutput, $newAbsolutePath, $this->resizeSettings['quality']);
-            imagedestroy($imageOutput);
-        }
-    }
-
-    /**
      * Resize and save new generated image
      *
      * @return bool
@@ -469,13 +441,11 @@ class Resize
      */
     protected function resizeAndSaveImage(): bool
     {
-        if ($this->config->convertPngImage() && $this->getFormat() !== self::FORMAT_WEBP) {
-            if (!$this->mediaDirectoryRead->isFile($this->absolutePathoriginal)) {
-                return false;
-            }
-            $this->convertPngToJpg();
-        } else {
-            if (!$this->mediaDirectoryRead->isFile($this->relativeFilename)) {
+        if ($this->getFormat() === self::FORMAT_WEBP) {
+            try {
+                $this->webpConvertor->convert($this->getAbsolutePathResized());
+                return true;
+            } catch (Exception $exception) {
                 return false;
             }
         }
@@ -499,10 +469,6 @@ class Resize
         $imageAdapter->quality($this->resizeSettings['quality']);
         $imageAdapter->resize($this->width, $this->height);
         $imageAdapter->save($this->getAbsolutePathResized());
-
-        if ($this->getFormat() === self::FORMAT_WEBP) {
-            $this->webpConvertor->convert($this->getAbsolutePathResized());
-        }
 
         return true;
     }
