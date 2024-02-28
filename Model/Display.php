@@ -190,6 +190,7 @@ class Display
      */
     protected function getBreakPointImages($imagePath, $bpWidth, $bpHeight, $resize, $format = null)
     {
+        $html = '';
         $imageUrl = $this->resize->resizeAndGetUrl($imagePath, $bpWidth, $bpHeight, $resize, $format);
         if ($imageUrl !== '') {
             $html = $imageUrl;
