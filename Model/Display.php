@@ -191,10 +191,12 @@ class Display
     protected function getBreakPointImages($imagePath, $bpWidth, $bpHeight, $resize, $format = null)
     {
         $imageUrl = $this->resize->resizeAndGetUrl($imagePath, $bpWidth, $bpHeight, $resize, $format);
-        $html     = $imageUrl;
-        if ($this->isRetina()) {
-            $imageUrl = $this->resize->resizeAndGetUrl($imagePath, $bpWidth * 2, $bpHeight * 2, $resize, $format);
-            $html     .= ' 1x, ' . $imageUrl . ' 2x, ';
+        if ($imageUrl !== '') {
+            $html = $imageUrl;
+            if ($this->isRetina()) {
+                $imageUrl = $this->resize->resizeAndGetUrl($imagePath, $bpWidth * 2, $bpHeight * 2, $resize, $format);
+                $html     .= ' 1x, ' . $imageUrl . ' 2x, ';
+            }
         }
 
         return $html;
