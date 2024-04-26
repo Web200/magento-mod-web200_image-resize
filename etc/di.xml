@@ -45,4 +45,7 @@
         <plugin name="web200_imageadd_default_placeholder_image"
                 type="Web200\ImageResize\Plugin\AddDefaultPlaceholderImage"/>
     </type>
+
+    <!-- Add crop -->
+    <preference for="Magento\Framework\Image\Adapter\Gd2" type="Web200\ImageResize\Preference\Gd2"/>
 </config>

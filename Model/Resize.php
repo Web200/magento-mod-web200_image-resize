@@ -21,7 +21,7 @@ use Web200\ImageResize\Provider\Config;
  *
  * @package   Web200\ImageResize\Model
  * @author    Web200 <contact@web200.fr>
- * @copyright 2019 Web200
+ * @copyright 2024 Web200
  * @license   https://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link      https://www.web200.fr/
  */
@@ -114,6 +114,7 @@ class Resize
      * - backgroundColor[null]: Default white
      */
     protected $defaultSettings = [
+        'crop'             => true,
         'constrainOnly'    => true,
         'keepAspectRatio'  => true,
         'keepTransparency' => true,
@@ -127,6 +128,7 @@ class Resize
      * @var string[] $subPathSettingsMapping
      */
     protected $subPathSettingsMapping = [
+        'crop'             => 'cr',
         'constrainOnly'    => 'co',
         'keepAspectRatio'  => 'ar',
         'keepTransparency' => 'tr',
@@ -289,6 +291,7 @@ class Resize
     {
         // Init resize settings with default
         $this->resizeSettings = [
+            'crop'             => false,
             'constrainOnly'    => $this->config->getDefaultConstrainOnly(),
             'keepAspectRatio'  => $this->config->getDefaultKeepAspectRatio(),
             'keepTransparency' => $this->config->getDefaultKeepTransparency(),
@@ -467,7 +470,13 @@ class Resize
         $imageAdapter->keepFrame($this->resizeSettings['keepFrame']);
         $imageAdapter->backgroundColor($this->resizeSettings['backgroundColor']);
         $imageAdapter->quality($this->resizeSettings['quality']);
-        $imageAdapter->resize($this->width, $this->height);
+
+        if ($this->resizeSettings['crop'] === true) {
+            $imageAdapter->resizeToSquare($this->width, $this->height);
+        } else {
+            $imageAdapter->resize($this->width, $this->height);
+        }
+
         $imageAdapter->save($this->getAbsolutePathResized());
 
         return true;
