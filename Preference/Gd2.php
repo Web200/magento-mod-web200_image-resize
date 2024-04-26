@@ -12,35 +12,42 @@ namespace Web200\ImageResize\Preference;
 class Gd2 extends \Magento\Framework\Image\Adapter\Gd2
 {
     /**
-     * @param $new_width
-     * @param $new_height
+     * @param $newWidth
+     * @param $newHeight
      *
      * @return void
      */
-    public function resizeToSquare($new_width, $new_height)
+    public function resizeToSquare($newWidth, $newHeight)
     {
         $origWidth  = $this->_imageSrcWidth;
         $origHeight = $this->_imageSrcHeight;
 
-        $newRatio  = $new_width / $new_height;
+        $newRatio  = $newWidth / $newHeight;
         $origRatio = $origWidth / $origHeight;
 
         if ($origRatio > $newRatio) {
-            $tempWidth = round($origRatio * $new_height);
+            if ($origHeight < $newHeight) {
+                $newHeight = $origHeight;
+            }
+            $tempWidth = round($origRatio * $newHeight);
 
-            $this->resize($tempWidth, $new_height);
+            $this->resize($tempWidth, $newHeight);
 
-            $cropAmount    = floor(($tempWidth - $new_width) / 2);
-            $cropRemainder = ($tempWidth - $new_width) % 2;
+            $cropAmount    = floor(($tempWidth - $newWidth) / 2);
+            $cropRemainder = ($tempWidth - $newWidth) % 2;
 
             $this->crop(0, $cropAmount + $cropRemainder, $cropAmount, 0);
         } else {
-            $tempHeight = round((1 / $origRatio) * $new_width);
+            if ($origWidth < $newWidth) {
+                $newWidth = $origWidth;
+            }
 
-            $this->resize($new_width, $tempHeight);
+            $tempHeight = round((1 / $origRatio) * $newWidth);
 
-            $cropAmount    = floor(($tempHeight - $new_height) / 2);
-            $cropRemainder = ($tempHeight - $new_height) % 2;
+            $this->resize($newWidth, $tempHeight);
+
+            $cropAmount    = floor(($tempHeight - $newHeight) / 2);
+            $cropRemainder = ($tempHeight - $newHeight) % 2;
 
             $this->crop($cropAmount + $cropRemainder, 0, 0, $cropAmount);
         }
