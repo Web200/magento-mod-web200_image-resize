@@ -19,21 +19,13 @@ use Web200\ImageResize\Provider\Config;
 class DontGenerateSwatch
 {
     /**
-     * Config
-     *
-     * @var Config $config
-     */
-    protected $config;
-
-    /**
      * DontGenerateSwatch constructor.
      *
      * @param Config $config
      */
     public function __construct(
-        Config $config
+        protected Config $config
     ) {
-        $this->config = $config;
     }
 
     /**
@@ -42,17 +34,21 @@ class DontGenerateSwatch
      * @param Media    $subject
      * @param callable $proceed
      * @param string   $imageUrl
+     *
+     * @return void
      */
     public function aroundGenerateSwatchVariations(
         Media $subject,
         callable $proceed,
         $imageUrl
     ) {
-        /** @var string[] $pathParts */
-        $pathParts = pathinfo($imageUrl);
-        if ($pathParts['extension'] === 'svg' && $this->config->isSvgEnabled()) {
-            // Don't generate swatch variations
-            return;
+        if ($imageUrl) {
+            /** @var string[] $pathParts */
+            $pathParts = pathinfo($imageUrl);
+            if ($pathParts['extension'] === 'svg' && $this->config->isSvgEnabled()) {
+                // Don't generate swatch variations
+                return;
+            }
         }
 
         return $proceed($imageUrl);
