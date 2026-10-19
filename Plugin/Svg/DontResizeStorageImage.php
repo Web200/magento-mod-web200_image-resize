@@ -10,7 +10,7 @@ use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\Exception\FileSystemException;
 use Magento\Framework\Exception\ValidatorException;
 use Magento\Framework\Filesystem;
-use Magento\Framework\Filesystem\Directory\Write;
+use Magento\Framework\Filesystem\Directory\WriteInterface;
 use Web200\ImageResize\Provider\Config;
 
 /**
@@ -18,7 +18,7 @@ use Web200\ImageResize\Provider\Config;
  *
  * @package   Web200\ImageResize\Plugin\Svg
  * @author    Web200 <contact@web200.fr>
- * @copyright 2021 Web200
+ * @copyright 2026 Web200
  * @license   https://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link      https://www.web200.fr/
  */
@@ -30,18 +30,20 @@ class DontResizeStorageImage
      * @var Config $config
      */
     protected $config;
+
     /**
      * Directory
      *
-     * @var Write $directory
+     * @var WriteInterface $directory
      */
     protected $directory;
+
     /**
      * Cms wysiwyg images
      *
      * @var Images
      */
-    protected $cmsWysiwygImages = null;
+    protected $cmsWysiwygImages;
 
     /**
      * AuthorizeSvgUpload constructor.
@@ -79,9 +81,9 @@ class DontResizeStorageImage
         $keepRatio = true
     ) {
         if ((string)$source !== '') {
-            $pathParts = pathinfo($source);
+            $pathParts = pathinfo((string)$source);
             if (isset($pathParts['extension'])) {
-                if ($pathParts['extension'] === 'svg' && $this->config->isSvgEnabled()) {
+                if (strtolower($pathParts['extension']) === 'svg' && $this->config->isSvgEnabled()) {
                     return true;
                 }
             }
@@ -94,7 +96,7 @@ class DontResizeStorageImage
      * Authorize svg upload
      *
      * @param Storage $subject
-     * @param         $result
+     * @param mixed   $result
      *
      * @return mixed
      */
@@ -103,16 +105,19 @@ class DontResizeStorageImage
         if (!$this->config->isSvgEnabled()) {
             return $result;
         }
-        $result[] = 'svg';
+
+        if (is_array($result) && !in_array('svg', $result, true)) {
+            $result[] = 'svg';
+        }
 
         return $result;
     }
 
     /**
-     * Authorize svg upload
+     * Authorize svg upload thumbnail URL
      *
      * @param Storage $subject
-     * @param         $result
+     * @param string  $result
      * @param string  $filePath
      * @param bool    $checkFile
      *
@@ -121,10 +126,10 @@ class DontResizeStorageImage
      */
     public function afterGetThumbnailUrl(Storage $subject, $result, $filePath, $checkFile = false)
     {
-        $pathParts = pathinfo($filePath);
+        $pathParts = pathinfo((string)$filePath);
         if (isset($pathParts['extension'])) {
-            if ($pathParts['extension'] === 'svg' && $this->config->isSvgEnabled()) {
-                $thumbRelativePath = ltrim($this->directory->getRelativePath($filePath), '/\\');
+            if (strtolower($pathParts['extension']) === 'svg' && $this->config->isSvgEnabled()) {
+                $thumbRelativePath = ltrim($this->directory->getRelativePath((string)$filePath), '/\\');
                 $baseUrl           = rtrim($this->cmsWysiwygImages->getBaseUrl(), '/');
                 $randomIndex       = '?rand=' . time();
 

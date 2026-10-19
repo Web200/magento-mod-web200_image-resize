@@ -14,7 +14,7 @@ use Web200\ImageResize\Provider\Config;
  *
  * @package   Web200\ImageResize\Model
  * @author    Web200 <contact@web200.fr>
- * @copyright 2019 Web200
+ * @copyright 2026 Web200
  * @license   https://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link      https://www.web200.fr/
  */
@@ -26,30 +26,35 @@ class Display
      * @var PlaceholderFactory $placeholderFactory
      */
     protected $placeholderFactory;
+
     /**
      * Resize
      *
      * @var Resize $resize
      */
     protected $resize;
+
     /**
      * Filesystem
      *
      * @var Filesystem $filesystem
      */
     protected $filesystem;
+
     /**
      * Config
      *
      * @var Config $config
      */
     protected $config;
+
     /**
      * Webp convertor
      *
      * @var WebpConvertor $webpConvertor
      */
     protected $webpConvertor;
+
     /**
      * @var bool $retina
      */
@@ -79,7 +84,7 @@ class Display
     }
 
     /**
-     * Get media pPath
+     * Get media path
      *
      * @return string
      */
@@ -89,7 +94,7 @@ class Display
     }
 
     /**
-     * Get Image
+     * Get Image HTML
      *
      * ->getImage($imagePath, $width, $height, ['retina' => true, 'breakpoints' => ['1440' => ['100', '200'], '768' => ['100', '200']]])
      *
@@ -102,28 +107,18 @@ class Display
      */
     public function getImage(string $imagePath, int $width, int $height, array $params = []): string
     {
-        /** @var bool $retina */
         $resize = $params['resize'] ?? [];
-        $this->setRetina($params['retina'] ?? false);
-        /** @var string $title */
-        $title = $params['title'] ?? '';
-        /** @var string $placeholderType */
-        $placeholderType = $params['placeholder_type'] ?? 'default';
-        /** @var string $alt */
-        $alt = $params['alt'] ?? $title;
-        /** @var string $class */
+        $this->setRetina((bool)($params['retina'] ?? false));
+        $title = (string)($params['title'] ?? '');
+        $placeholderType = (string)($params['placeholder_type'] ?? 'default');
+        $alt = (string)($params['alt'] ?? $title);
         $class = isset($params['class']) ? 'lazy ' . $params['class'] : 'lazy';
-        /** @var string[] $breakpoints */
         $breakpoints = $params['breakpoints'] ?? [];
 
-        /** @var bool $placeholder */
         $placeholder = (bool)($params['placeholder'] ?? true);
-        /** @var string $placeholderImagePath */
         $placeholderImagePath = (string)$this->placeholderFactory->create(['type' => $placeholderType])->getPath();
-        /** @var string $placeholderImageUrl */
         $placeholderImageUrl = $this->resize->resizeAndGetUrl($placeholderImagePath, $width, $height, $resize);
 
-        /** @var string $mainImageUrl */
         $mainImageUrl = $this->resize->resizeAndGetUrl($imagePath, $width, $height, $resize);
         if ($mainImageUrl === '') {
             $imagePath    = $placeholderImagePath;
@@ -131,35 +126,47 @@ class Display
         }
 
         if ($this->isSvgImage($imagePath)) {
-            return '<picture><img loading="lazy" alt="' . $alt . '" title="' . $title . '" class="' . $class . '" ' . ($placeholder ? '  src="' . $placeholderImageUrl . '"' : '') . '  width="' . $width . '" height="' . $height . '" data-src="' . $mainImageUrl . '"/></picture>';
+            return '<picture><img loading="lazy" alt="' . htmlspecialchars($alt, ENT_QUOTES) . '" title="' . htmlspecialchars($title, ENT_QUOTES) . '" class="' . htmlspecialchars($class, ENT_QUOTES) . '" ' . ($placeholder ? ' src="' . $placeholderImageUrl . '"' : '') . ' width="' . $width . '" height="' . $height . '" data-src="' . $mainImageUrl . '"/></picture>';
         }
 
-        /** @var string $html */
         $html = '<picture>';
         if (is_array($breakpoints) && !empty($breakpoints)) {
-            /** @var int $bpWidth */
-            /** @var int $bpHeight */
-            foreach ($breakpoints as $breakpoint => [$bpWidth, $bpHeight]) {
-                $html .= '<source media="(min-width: ' . $breakpoint . 'px)" data-srcset="';
-                if ($this->config->isWebpEnabled()) {
-                    $html .= $this->getBreakPointImages($imagePath, $bpWidth, $bpHeight, $resize, 'webp');
+            foreach ($breakpoints as $breakpoint => $dimensions) {
+                if (!is_array($dimensions)) {
+                    continue;
                 }
-                $html .= $this->getBreakPointImages($imagePath, $bpWidth, $bpHeight, $resize);
+                $bpWidth = isset($dimensions[0]) ? (int)$dimensions[0] : null;
+                $bpHeight = isset($dimensions[1]) ? (int)$dimensions[1] : null;
+                if (!$bpWidth || !$bpHeight) {
+                    continue;
+                }
 
-                $html .= '" />';
+                if ($this->config->isWebpEnabled()) {
+                    $webpSrcset = $this->getBreakPointImages($imagePath, $bpWidth, $bpHeight, $resize, 'webp');
+                    if ($webpSrcset !== '') {
+                        $html .= '<source type="image/webp" media="(min-width: ' . (int)$breakpoint . 'px)" data-srcset="' . $webpSrcset . '" />';
+                    }
+                }
+                $defaultSrcset = $this->getBreakPointImages($imagePath, $bpWidth, $bpHeight, $resize);
+                if ($defaultSrcset !== '') {
+                    $html .= '<source media="(min-width: ' . (int)$breakpoint . 'px)" data-srcset="' . $defaultSrcset . '" />';
+                }
             }
         }
 
-        /** @var string $mainSrcset */
+        if ($this->config->isWebpEnabled()) {
+            $mainWebpSrcset = $this->getBreakPointImages($imagePath, $width, $height, $resize, 'webp');
+            if ($mainWebpSrcset !== '') {
+                $html .= '<source type="image/webp" data-srcset="' . $mainWebpSrcset . '" />';
+            }
+        }
+
         $mainSrcset = '';
         if ($this->isRetina()) {
-            if ($this->config->isWebpEnabled()) {
-                $mainSrcset .= $this->getBreakPointImages($imagePath, $width * 2, $height *2, $resize, 'webp');
-            }
-            $mainSrcset .= $this->getBreakPointImages($imagePath, $width *2, $height *2, $resize);
+            $mainSrcset = $this->getBreakPointImages($imagePath, $width, $height, $resize);
         }
 
-        $html .= '<img loading="lazy" alt="' . $alt . '" title="' . $title . '" class="' . $class . '" ' . ($placeholder ? '  src="' . $placeholderImageUrl . '"' : '') . '  width="' . $width . '" height="' . $height . '" data-src="' . $mainImageUrl . '"  data-srcset="' . $mainSrcset . '"/>';
+        $html .= '<img loading="lazy" alt="' . htmlspecialchars($alt, ENT_QUOTES) . '" title="' . htmlspecialchars($title, ENT_QUOTES) . '" class="' . htmlspecialchars($class, ENT_QUOTES) . '" ' . ($placeholder ? ' src="' . $placeholderImageUrl . '"' : '') . ' width="' . $width . '" height="' . $height . '" data-src="' . $mainImageUrl . '"' . ($mainSrcset !== '' ? ' data-srcset="' . $mainSrcset . '"' : '') . '/>';
         $html .= '</picture>';
 
         return $html;
@@ -174,48 +181,53 @@ class Display
      */
     protected function isSvgImage(string $imagePath): bool
     {
-        /** @var string $imageParts */
+        /** @var string[] $imageParts */
         $imageParts = pathinfo($imagePath);
 
-        return isset($imageParts['extension']) && $imageParts['extension'] === 'svg';
+        return isset($imageParts['extension']) && strtolower($imageParts['extension']) === 'svg';
     }
 
     /**
-     * @param $imagePath
-     * @param $bpWidth
-     * @param $bpHeight
-     * @param $resize
+     * Get breakpoint images srcset string
+     *
+     * @param string      $imagePath
+     * @param int         $bpWidth
+     * @param int         $bpHeight
+     * @param array       $resize
+     * @param string|null $format
      *
      * @return string
      */
-    protected function getBreakPointImages($imagePath, $bpWidth, $bpHeight, $resize, $format = null)
+    protected function getBreakPointImages(string $imagePath, int $bpWidth, int $bpHeight, array $resize, ?string $format = null): string
     {
-        $html = '';
         $imageUrl = $this->resize->resizeAndGetUrl($imagePath, $bpWidth, $bpHeight, $resize, $format);
-        if ($imageUrl !== '') {
-            $html = $imageUrl;
-            if ($this->isRetina()) {
-                $imageUrl = $this->resize->resizeAndGetUrl($imagePath, $bpWidth * 2, $bpHeight * 2, $resize, $format);
-                $html     .= ' 1x, ' . $imageUrl . ' 2x, ';
+        if ($imageUrl === '') {
+            return '';
+        }
+
+        if ($this->isRetina()) {
+            $imageUrl2x = $this->resize->resizeAndGetUrl($imagePath, $bpWidth * 2, $bpHeight * 2, $resize, $format);
+            if ($imageUrl2x !== '') {
+                return $imageUrl . ' 1x, ' . $imageUrl2x . ' 2x';
             }
         }
 
-        return $html;
+        return $imageUrl;
     }
 
     /**
      * Get webp image if enabled
      *
-     * @param $image
+     * @param string $image
      *
      * @return string
      */
-    protected function getWebpImage($image): string
+    protected function getWebpImage(string $image): string
     {
         if ($this->config->isWebpEnabled()) {
             $webPImage = $this->webpConvertor->getWebPImage($image);
-            if ($webPImage !== '' && $this->webpConvertor->isWebpImageExist($webPImage)) {
-                $image = $webPImage;
+            if ($webPImage !== null && $this->webpConvertor->isWebpImageExist($webPImage)) {
+                return $webPImage;
             }
         }
 

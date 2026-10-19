@@ -11,6 +11,10 @@ use Web200\ImageResize\Provider\Config;
  * Class DontGenerateSwatch
  *
  * @package   Web200\ImageResize\Plugin\Svg
+ * @author    Web200 <contact@web200.fr>
+ * @copyright 2026 Web200
+ * @license   https://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link      https://www.web200.fr/
  */
 class DontGenerateSwatch
 {
@@ -29,7 +33,7 @@ class DontGenerateSwatch
      * @param callable $proceed
      * @param string   $imageUrl
      *
-     * @return void
+     * @return Media
      */
     public function aroundGenerateSwatchVariations(
         Media $subject,
@@ -37,12 +41,12 @@ class DontGenerateSwatch
         $imageUrl
     ) {
         if ($imageUrl) {
-            $pathParts = pathinfo($imageUrl);
+            $pathParts = pathinfo((string)$imageUrl);
             if (isset($pathParts['extension']) &&
                 strtolower($pathParts['extension']) === 'svg' &&
                 $this->config->isSvgEnabled()
             ) {
-                return;
+                return $subject;
             }
         }
 

@@ -154,8 +154,8 @@ If you need to, you can clear the resized images cache on the Admin Cache Manage
 
 ## Prerequisites
 
-- PHP >= 7.1.*
-- Magento >= 2.3.*
+- PHP >= 8.3 (PHP 8.3, 8.4, 8.5)
+- Magento >= 2.4.*
 
 ## Forked from 
 https://github.com/staempfli/magento2-module-image-resizer

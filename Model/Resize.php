@@ -21,7 +21,7 @@ use Web200\ImageResize\Provider\Config;
  *
  * @package   Web200\ImageResize\Model
  * @author    Web200 <contact@web200.fr>
- * @copyright 2024 Web200
+ * @copyright 2026 Web200
  * @license   https://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link      https://www.web200.fr/
  */
@@ -33,76 +33,82 @@ class Resize
      * @var string FORMAT_WEBP
      */
     public const FORMAT_WEBP = 'webp';
+
     /**
      * constant CACHE_TAG_IDENTIFIER
      *
      * @var string CACHE_TAG_IDENTIFIER
      */
     public const CACHE_TAG_IDENTIFIER = 'web200_imageresize';
+
     /**
      * constant IMAGE_RESIZE_DIR
      *
      * @var string IMAGE_RESIZE_DIR
      */
     public const IMAGE_RESIZE_DIR = 'imageresize';
+
     /**
      * constant IMAGE_RESIZE_CACHE_DIR
      *
      * @var string IMAGE_RESIZE_CACHE_DIR
      */
     public const IMAGE_RESIZE_CACHE_DIR = self::IMAGE_RESIZE_DIR . '/' . DirectoryList::CACHE;
+
     /**
      * Image adapter factory
      *
      * @var imageAdapterFactory $imageAdapterFactory
      */
     protected $imageAdapterFactory;
+
     /**
      * Resize settings
      *
-     * @var string[] $resizeSettings
+     * @var array $resizeSettings
      */
     protected $resizeSettings = [];
+
     /**
      * Relative filename
      *
      * @var string $relativeFilename
      */
-    protected $relativeFilename;
+    protected $relativeFilename = '';
+
     /**
      * Width
      *
-     * @var int $width
+     * @var int|null $width
      */
     protected $width;
+
     /**
      * Height
      *
-     * @var int $height
+     * @var int|null $height
      */
     protected $height;
+
     /**
      * Write interface
      *
      * @var WriteInterface $mediaDirectoryRead
      */
     protected $mediaDirectoryRead;
+
     /**
      * Store manager interface
      *
      * @var StoreManagerInterface $storeManager
      */
     protected $storeManager;
-    /**
-     * Absolute original path if png to jpg is use
-     *
-     * @var string $absolutePathoriginal
-     */
-    protected $absolutePathoriginal;
+
     /**
      * @var array $tempCache
      */
     protected $tempCache = [];
+
     /**
      * @var array
      *
@@ -122,6 +128,7 @@ class Resize
         'backgroundColor'  => null,
         'quality'          => 85
     ];
+
     /**
      * Sub path settings mapping
      *
@@ -135,36 +142,42 @@ class Resize
         'keepFrame'        => 'fr',
         'backgroundColor'  => 'bc',
     ];
+
     /**
      * File
      *
      * @var File $fileIo
      */
     protected $fileIo;
+
     /**
      * Logger interface
      *
      * @var LoggerInterface $logger
      */
     protected $logger;
+
     /**
      * Config
      *
      * @var Config $config
      */
     protected $config;
+
     /**
      * Cache
      *
      * @var CacheInterface $cache
      */
     protected $cache;
+
     /**
      * Webp convertor
      *
      * @var WebpConvertor $webpConvertor
      */
     protected $webpConvertor;
+
     /**
      * @var string|null $format
      */
@@ -216,7 +229,11 @@ class Resize
      */
     public function resizeAndGetUrl(string $imagePath, $width, $height, array $resizeSettings = [], ?string $format = null): string
     {
-        $cacheKey = md5($imagePath . '-' . $width . '-' . $height . '-' . json_encode($resizeSettings) . '-' . (string)$format);
+        if (trim($imagePath) === '') {
+            return '';
+        }
+
+        $cacheKey = md5($imagePath . '-' . (string)$width . '-' . (string)$height . '-' . json_encode($resizeSettings) . '-' . (string)$format);
         if (isset($this->tempCache[$cacheKey])) {
             return $this->tempCache[$cacheKey];
         }
@@ -228,11 +245,10 @@ class Resize
 
         $this->setFormat($format);
 
-
         /** @var string $resultUrl */
         $resultUrl = '';
         try {
-            if (strpos($imagePath, 'http') !== 0) {
+            if (!str_starts_with($imagePath, 'http')) {
                 $this->relativeFilename = str_replace($this->mediaDirectoryRead->getAbsolutePath(), '', $imagePath);
             } else {
                 // Set $resultUrl with $fileUrl to return this one in case the resize fails.
@@ -252,7 +268,7 @@ class Resize
             if (!isset($imagePathPart['extension'])) {
                 return '';
             }
-            if ($imagePathPart['extension'] === 'svg') {
+            if (strtolower($imagePathPart['extension']) === 'svg') {
                 $resultUrl = $this->storeManager->getStore()->getBaseUrl(UrlInterface::URL_TYPE_MEDIA) . $this->relativeFilename;
                 $this->cache->save($resultUrl, $cacheKey, [self::CACHE_TAG_IDENTIFIER]);
                 return $resultUrl;
@@ -260,9 +276,10 @@ class Resize
 
             $this->initSize($width, $height);
             $this->initResizeSettings($resizeSettings);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error("Web200_ImageResize: could not find image: \n" . $e->getMessage());
         }
+
         try {
             // Check if resized image already exists in cache
             $resizedUrl = $this->getResizedImageUrl();
@@ -275,8 +292,8 @@ class Resize
 
             $this->cache->save($resultUrl, $cacheKey, [self::CACHE_TAG_IDENTIFIER]);
             $this->tempCache[$cacheKey] = $resultUrl;
-        } catch (\Exception $e) {
-            $this->logger->error("Web200_ImageResize: could not resize image: ".$imagePath." \n" . $e->getMessage());
+        } catch (\Throwable $e) {
+            $this->logger->error("Web200_ImageResize: could not resize image: " . $imagePath . " \n" . $e->getMessage());
         }
 
         return $resultUrl;
@@ -312,17 +329,17 @@ class Resize
      *
      * @param string $imageUrl
      *
-     * @return bool|mixed|string
+     * @return void
      * @throws NoSuchEntityException
      */
     protected function initRelativeFilenameFromUrl(string $imageUrl): void
     {
-        $this->relativeFilename = false; // reset filename in case there was another value defined
+        $this->relativeFilename = ''; // reset filename in case there was another value defined
         $mediaUrl               = $this->storeManager->getStore()->getBaseUrl(UrlInterface::URL_TYPE_MEDIA);
         $mediaPath              = parse_url($mediaUrl, PHP_URL_PATH);
         $imagePath              = parse_url($imageUrl, PHP_URL_PATH);
 
-        if (0 === strpos($imagePath, $mediaPath)) {
+        if ($imagePath && $mediaPath && str_starts_with($imagePath, $mediaPath)) {
             $this->relativeFilename = substr_replace($imagePath, '', 0, strlen($mediaPath));
         }
     }
@@ -335,8 +352,8 @@ class Resize
      */
     protected function initSize($width, $height): void
     {
-        $this->width  = $width;
-        $this->height = $height;
+        $this->width  = $width !== null ? (int)$width : null;
+        $this->height = $height !== null ? (int)$height : null;
     }
 
     /**
@@ -349,7 +366,7 @@ class Resize
      */
     protected function getResizeSubFolderName(): string
     {
-        $subPath = $this->width . "x" . $this->height;
+        $subPath = (string)$this->width . "x" . (string)$this->height;
         foreach ($this->resizeSettings as $key => $value) {
             if ($value && isset($this->subPathSettingsMapping[$key])) {
                 $subPath .= "_" . $this->subPathSettingsMapping[$key];
@@ -402,7 +419,7 @@ class Resize
     /**
      * Get url of resized image
      *
-     * @return bool|string
+     * @return string
      * @throws NoSuchEntityException
      */
     protected function getResizedImageUrl(): string
@@ -410,9 +427,11 @@ class Resize
         $relativePath = $this->getRelativePathResizedImage();
         if ($this->getFormat() === self::FORMAT_WEBP) {
             $relativePath = $this->webpConvertor->getWebPImage($relativePath);
-        } else {
-            $relativePath = $this->getRelativePathResizedImage();
+            if (!$relativePath) {
+                return '';
+            }
         }
+
         if ($this->mediaDirectoryRead->isFile($relativePath)) {
             return $this->storeManager->getStore()->getBaseUrl(UrlInterface::URL_TYPE_MEDIA) . $relativePath;
         }
@@ -423,7 +442,7 @@ class Resize
     /**
      * Get image url
      *
-     * @return bool|string
+     * @return string
      * @throws NoSuchEntityException
      */
     protected function getImageUrl(): string
@@ -440,17 +459,36 @@ class Resize
      * Resize and save new generated image
      *
      * @return bool
-     * @throws \Exception
      */
     protected function resizeAndSaveImage(): bool
     {
         if ($this->getFormat() === self::FORMAT_WEBP) {
             try {
-                $this->webpConvertor->convert($this->getAbsolutePathResized());
-                return true;
-            } catch (Exception $exception) {
+                if (!file_exists($this->getAbsolutePathResized())) {
+                    if (!$this->generateResizedImage()) {
+                        return false;
+                    }
+                }
+                $converted = $this->webpConvertor->convert($this->getAbsolutePathResized());
+                return !empty($converted);
+            } catch (\Throwable $exception) {
+                $this->logger->error("Web200_ImageResize: could not convert to webp: " . $exception->getMessage());
                 return false;
             }
+        }
+
+        return $this->generateResizedImage();
+    }
+
+    /**
+     * Generate the base resized image
+     *
+     * @return bool
+     */
+    protected function generateResizedImage(): bool
+    {
+        if (!file_exists($this->getAbsolutePathOriginal())) {
+            return false;
         }
 
         $imageAdapter = $this->imageAdapterFactory->create();
@@ -464,12 +502,12 @@ class Resize
                 $this->resizeSettings['watermark']['title'] ?? null
             );
         }
-        $imageAdapter->constrainOnly($this->resizeSettings['constrainOnly']);
-        $imageAdapter->keepAspectRatio($this->resizeSettings['keepAspectRatio']);
-        $imageAdapter->keepTransparency($this->resizeSettings['keepTransparency']);
-        $imageAdapter->keepFrame($this->resizeSettings['keepFrame']);
+        $imageAdapter->constrainOnly((bool)$this->resizeSettings['constrainOnly']);
+        $imageAdapter->keepAspectRatio((bool)$this->resizeSettings['keepAspectRatio']);
+        $imageAdapter->keepTransparency((bool)$this->resizeSettings['keepTransparency']);
+        $imageAdapter->keepFrame((bool)$this->resizeSettings['keepFrame']);
         $imageAdapter->backgroundColor($this->resizeSettings['backgroundColor']);
-        $imageAdapter->quality($this->resizeSettings['quality']);
+        $imageAdapter->quality((int)$this->resizeSettings['quality']);
 
         if ($this->resizeSettings['crop'] === true) {
             $imageAdapter->resizeToSquare($this->width, $this->height);
@@ -494,10 +532,16 @@ class Resize
         $filepointer = null;
 
         if (is_string($file)) {
-            if (strpos(strtolower($file), '.gif') === false) {
+            if (!str_ends_with(strtolower($file), '.gif') && strpos(strtolower($file), '.gif') === false) {
                 return false;
             }
-            $filepointer = fopen($file, "rb");
+            if (!is_file($file)) {
+                return false;
+            }
+            $filepointer = @fopen($file, "rb");
+            if (!$filepointer) {
+                return false;
+            }
         } else {
             $filepointer = $file;
             /* Make sure that we are at the beginning of the file */
@@ -527,7 +571,7 @@ class Resize
     }
 
     /**
-     * @return void
+     * @return string|null
      */
     protected function getFormat(): ?string
     {

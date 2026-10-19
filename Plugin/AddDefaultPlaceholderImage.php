@@ -16,19 +16,25 @@ class AddDefaultPlaceholderImage
     /**
      * Add default placeholder image
      *
-     * @param Image    $subject
-     * @param string[] $prefixes
+     * @param Image      $subject
+     * @param array|null $prefixes
      *
-     * @return string[]
+     * @return array
      */
-    public function afterGetPrefixes(Image $subject, $prefixes)
+    public function afterGetPrefixes(Image $subject, ?array $prefixes): array
     {
-        if (is_array($prefixes)) {
-            $prefixes[] = [
-                'field' => 'default_',
-                'label' => 'Non Product Image placeholder',
-            ];
+        $prefixes = $prefixes ?? [];
+
+        foreach ($prefixes as $prefix) {
+            if (isset($prefix['field']) && $prefix['field'] === 'default_') {
+                return $prefixes;
+            }
         }
+
+        $prefixes[] = [
+            'field' => 'default_',
+            'label' => 'Non Product Image placeholder',
+        ];
 
         return $prefixes;
     }

@@ -21,6 +21,7 @@ class ValidateSvgFile
      * @var Config $config
      */
     protected $config;
+
     /**
      * File mime
      *
@@ -29,7 +30,7 @@ class ValidateSvgFile
     protected $fileMime;
 
     /**
-     * SanitizeSvgUpload constructor.
+     * ValidateSvgFile constructor.
      *
      * @param Config $config
      * @param Mime   $fileMime
@@ -49,24 +50,26 @@ class ValidateSvgFile
      * @param callable        $proceed
      * @param string          $filePath
      *
-     * @return mixed
+     * @return bool
      */
     public function aroundValidateUploadFile(
         AbstractAdapter $subject,
         callable $proceed,
         $filePath
-    ) {
+    ): bool {
+        if (!file_exists($filePath)) {
+            throw new \InvalidArgumentException('Upload file does not exist.');
+        }
+
+        if (filesize($filePath) === 0) {
+            throw new \InvalidArgumentException('Wrong file size.');
+        }
+
         $mimeType = $this->fileMime->getMimeType($filePath);
         if ($mimeType === 'image/svg+xml' && $this->config->isSvgEnabled()) {
-            if (!file_exists($filePath)) {
-                throw new \InvalidArgumentException('Upload file does not exist.');
-            }
-
-            if (filesize($filePath) === 0) {
-                throw new \InvalidArgumentException('Wrong file size.');
-            }
-        } else {
-            return $proceed($filePath);
+            return true;
         }
+
+        return (bool)$proceed($filePath);
     }
 }

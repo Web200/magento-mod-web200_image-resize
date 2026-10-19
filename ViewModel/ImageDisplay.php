@@ -17,7 +17,7 @@ use Web200\ImageResize\Model\Display;
  *
  * @package   Web200\ImageResize\ViewModel
  * @author    Web200 <contact@web200.fr>
- * @copyright 2020 Web200
+ * @copyright 2026 Web200
  * @license   https://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link      https://www.web200.fr/
  */
@@ -50,12 +50,14 @@ class ImageDisplay implements ArgumentInterface
     }
 
     /**
-     * @param $imagePath
+     * Retrieve view file path
+     *
+     * @param string $imagePath
      *
      * @return string
      * @throws LocalizedException
      */
-    public function getViewFilePath($imagePath): string
+    public function getViewFilePath(string $imagePath): string
     {
         if ($this->isDeveloperMode()) {
             return $this->getViewFileUrl($imagePath);
@@ -66,11 +68,13 @@ class ImageDisplay implements ArgumentInterface
     }
 
     /**
+     * Check if application is in developer mode
+     *
      * @return bool
      */
     public function isDeveloperMode(): bool
     {
-        return $this->state->getMode() == State::MODE_DEVELOPER;
+        return $this->state->getMode() === State::MODE_DEVELOPER;
     }
 
     /**
@@ -80,7 +84,7 @@ class ImageDisplay implements ArgumentInterface
      *
      * @return string
      */
-    public function getViewFileUrl(string $fileId)
+    public function getViewFileUrl(string $fileId): string
     {
         try {
             return $this->assetRepository->getUrl($fileId);

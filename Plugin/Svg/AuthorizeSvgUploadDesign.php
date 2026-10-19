@@ -12,7 +12,7 @@ use Web200\ImageResize\Provider\Config;
  *
  * @package   Web200\ImageResize\Plugin\Svg
  * @author    Web200 <contact@web200.fr>
- * @copyright 2021 Web200
+ * @copyright 2026 Web200
  * @license   https://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link      https://www.web200.fr/
  */
@@ -39,8 +39,8 @@ class AuthorizeSvgUploadDesign
     /**
      * Authorize svg upload
      *
-     * @param File                                     $subject
-     * @param                                          $result
+     * @param File             $subject
+     * @param array|mixed      $result
      *
      * @return mixed
      */
@@ -49,7 +49,10 @@ class AuthorizeSvgUploadDesign
         if (!$this->config->isSvgEnabled()) {
             return $result;
         }
-        $result[] = 'svg';
+
+        if (is_array($result) && !in_array('svg', $result, true)) {
+            $result[] = 'svg';
+        }
 
         return $result;
     }

@@ -37,23 +37,35 @@ class AuthorizeSvgUploadValidator
     }
 
     /**
-     * Authorize svg upload
+     * Authorize svg upload by removing svg from protected extensions
      *
      * @param NotProtectedExtension $subject
-     * @param                       $result
-     * @param Store|string|null     $store
+     * @param string|array|null     $result
+     * @param mixed                 $store
      *
-     * @return string[]
+     * @return string|array|null
      */
     public function afterGetProtectedFileExtensions(
         NotProtectedExtension $subject,
         $result,
         $store = null
-    ): array {
+    ) {
         if (!$this->config->isSvgEnabled()) {
             return $result;
         }
-        unset($result['svg']);
+
+        if (is_string($result)) {
+            $extensions = array_map('trim', explode(',', $result));
+            $extensions = array_filter($extensions, static fn($ext) => strtolower($ext) !== 'svg');
+            return implode(',', $extensions);
+        }
+
+        if (is_array($result)) {
+            if (isset($result['svg'])) {
+                unset($result['svg']);
+            }
+            return array_filter($result, static fn($ext) => strtolower(trim((string)$ext)) !== 'svg');
+        }
 
         return $result;
     }

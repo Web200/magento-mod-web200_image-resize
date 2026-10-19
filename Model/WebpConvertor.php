@@ -15,7 +15,6 @@ use Psr\Log\LoggerInterface;
 use Web200\ImageResize\Provider\Config;
 use WebPConvert\Convert\Exceptions\ConversionFailedException;
 use WebPConvert\WebPConvert;
-use Exception;
 
 /**
  * Class Convertor
@@ -34,18 +33,21 @@ class WebpConvertor
      * @var Config $config
      */
     protected $config;
+
     /**
      * Write interface
      *
      * @var WriteInterface $mediaDirectoryRead
      */
     protected $mediaDirectoryRead;
+
     /**
      * Store manager interface
      *
      * @var StoreManagerInterface $storeManager
      */
     protected $storeManager;
+
     /**
      * Logger
      *
@@ -67,14 +69,14 @@ class WebpConvertor
         Filesystem $filesystem,
         LoggerInterface $logger
     ) {
-        $this->config = $config;
-        $this->mediaDirectoryRead  = $filesystem->getDirectoryRead(DirectoryList::MEDIA);
-        $this->storeManager = $storeManager;
-        $this->logger = $logger;
+        $this->config             = $config;
+        $this->mediaDirectoryRead = $filesystem->getDirectoryRead(DirectoryList::MEDIA);
+        $this->storeManager       = $storeManager;
+        $this->logger             = $logger;
     }
 
     /**
-     * Convert
+     * Convert image to WebP
      *
      * @param string $image
      *
@@ -83,7 +85,7 @@ class WebpConvertor
     public function convert(string $image): string
     {
         try {
-            /** @var string $webImage */
+            /** @var string|null $webImage */
             $webImage = $this->getWebPImage($image);
             if (!$webImage) {
                 return '';
@@ -95,14 +97,14 @@ class WebpConvertor
             return $webImage;
         } catch (ConversionFailedException $exception) {
             return '';
-        } catch (Exception $exception) {
-            $this->logger->error('Unable to resize Image : ' . $image);
+        } catch (\Throwable $exception) {
+            $this->logger->error('Unable to resize Image : ' . $image . ' - ' . $exception->getMessage());
             return '';
         }
     }
 
     /**
-     * Get webp image
+     * Get webp image path
      *
      * @param string $image
      *
@@ -112,7 +114,7 @@ class WebpConvertor
     {
         /** @var string[] $pathParts */
         $pathParts = pathinfo($image);
-        if (preg_match('/^(jpg|jpeg|png)$/', $pathParts['extension'])) {
+        if (isset($pathParts['extension']) && preg_match('/^(jpg|jpeg|png)$/i', $pathParts['extension'])) {
             return preg_replace('/\.(jpg|jpeg|png)$/i', '.webp', $image);
         }
 
@@ -129,11 +131,7 @@ class WebpConvertor
      */
     protected function needsConversion(string $webImage): bool
     {
-        if (!file_exists($webImage)) {
-            return true;
-        }
-
-        return false;
+        return !file_exists($webImage);
     }
 
     /**
@@ -146,7 +144,7 @@ class WebpConvertor
         return [
             'quality'     => 'auto',
             'max-quality' => $this->config->getWebpQuality(),
-            'converter'  => $this->config->getWebpConverter()
+            'converter'   => $this->config->getWebpConverter()
         ];
     }
 
@@ -162,12 +160,12 @@ class WebpConvertor
     {
         /** @var string $mediaUrl */
         $mediaUrl  = $this->storeManager->getStore()->getBaseUrl(UrlInterface::URL_TYPE_MEDIA);
-        /** @var string $mediaPath */
+        /** @var string|null $mediaPath */
         $mediaPath = parse_url($mediaUrl, PHP_URL_PATH);
-        /** @var string $imagePath */
+        /** @var string|null $imagePath */
         $imagePath = parse_url($webpImageUrl, PHP_URL_PATH);
 
-        if (0 === strpos($imagePath, $mediaPath)) {
+        if ($imagePath && $mediaPath && str_starts_with($imagePath, $mediaPath)) {
             /** @var string $webpImagePath */
             $webpImagePath = $this->mediaDirectoryRead->getAbsolutePath(substr_replace($imagePath, '', 0, strlen($mediaPath)));
             return file_exists($webpImagePath);

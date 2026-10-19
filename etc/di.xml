@@ -5,11 +5,6 @@
         <plugin name="web200_image_resize_authorize_svg_upload"
                 type="Web200\ImageResize\Plugin\Svg\AuthorizeSvgUploadValidator"/>
     </type>
-    <!-- Authorize SVG upload in cms-->
-    <type name="Magento\Cms\Model\Wysiwyg\Images">
-        <plugin name="web200_image_authorize_svg_upload_design"
-                type="Web200\ImageResize\Plugin\Svg\AuthorizeSvgUploadCms"/>
-    </type>
     <!-- Authorize SVG upload in media uploader -->
     <type name="Magento\Backend\Block\Media\Uploader">
         <plugin name="web200_image_resize_authorize_svg_uploader"

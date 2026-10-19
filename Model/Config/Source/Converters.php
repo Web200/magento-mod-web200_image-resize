@@ -11,7 +11,7 @@ use Magento\Framework\Data\OptionSourceInterface;
  *
  * @package   Web200\ImageResize\Model\Config\Source
  * @author    Web200 <contact@web200.fr>
- * @copyright 2020 Web200
+ * @copyright 2026 Web200
  * @license   https://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link      https://www.web200.fr/
  */
@@ -25,11 +25,11 @@ class Converters implements OptionSourceInterface
     public function toOptionArray(): array
     {
         return [
-            ['value' => 'cwebp', 'label' => 'CWebP'],
-            ['value' => 'gd', 'label' => 'GD php extension'],
-            ['value' => 'imagick', 'label' => 'Image Magick'],
-            ['value' => 'wpc', 'label' => 'WebPConvert Cloud Service'],
-            ['value' => 'ewww', 'label' => 'ewww cloud converter']
+            ['value' => 'cwebp', 'label' => __('CWebP')],
+            ['value' => 'gd', 'label' => __('GD php extension')],
+            ['value' => 'imagick', 'label' => __('Image Magick')],
+            ['value' => 'wpc', 'label' => __('WebPConvert Cloud Service')],
+            ['value' => 'ewww', 'label' => __('ewww cloud converter')]
         ];
     }
 }

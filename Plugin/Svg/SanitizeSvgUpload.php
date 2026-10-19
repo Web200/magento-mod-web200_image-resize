@@ -12,9 +12,9 @@ use Web200\ImageResize\Provider\Config;
 /**
  * Class SanitizeSvgUpload
  *
- * @package   Web200\ImageResize\Plugin
+ * @package   Web200\ImageResize\Plugin\Svg
  * @author    Web200 <contact@web200.fr>
- * @copyright 2021 Web200
+ * @copyright 2026 Web200
  * @license   https://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link      https://www.web200.fr/
  */
@@ -43,10 +43,10 @@ class SanitizeSvgUpload
      *
      * @param Uploader $subject
      * @param callable $proceed
-     * @param          $destinationFolder
-     * @param null     $newFileName
+     * @param mixed    $destinationFolder
+     * @param mixed    $newFileName
      *
-     * @return bool|string[]
+     * @return bool|array
      */
     public function aroundSave(
         Uploader $subject,
@@ -54,7 +54,7 @@ class SanitizeSvgUpload
         $destinationFolder,
         $newFileName = null
     ) {
-        if ($subject->getFileExtension() === 'svg' && $this->config->isSvgEnabled()) {
+        if (strtolower((string)$subject->getFileExtension()) === 'svg' && $this->config->isSvgEnabled()) {
             $this->sanitizeTmpImages($subject);
         }
 
@@ -70,17 +70,16 @@ class SanitizeSvgUpload
      */
     protected function sanitizeTmpImages(Uploader $uploader): void
     {
-        /** @var Sanitizer $sanitizer */
-        $sanitizer = new Sanitizer();
-
-        /** @var bool $tmpFile */
         $tmpFile = $this->getTmpFile($uploader);
-        if (isset($tmpFile['tmp_name'])) {
-            /** @var string $dirtySVG */
+        if (isset($tmpFile['tmp_name']) && is_file($tmpFile['tmp_name'])) {
+            $sanitizer = new Sanitizer();
             $dirtySVG = file_get_contents($tmpFile['tmp_name']);
-            /** @var string $cleanSVG */
-            $cleanSVG = $sanitizer->sanitize($dirtySVG);
-            file_put_contents($tmpFile['tmp_name'], $cleanSVG);
+            if ($dirtySVG !== false) {
+                $cleanSVG = $sanitizer->sanitize($dirtySVG);
+                if ($cleanSVG !== false && is_string($cleanSVG)) {
+                    file_put_contents($tmpFile['tmp_name'], $cleanSVG);
+                }
+            }
         }
     }
 
@@ -89,11 +88,10 @@ class SanitizeSvgUpload
      *
      * @param Uploader $uploader
      *
-     * @return null|string[]
+     * @return null|array
      */
     protected function getTmpFile(Uploader $uploader): ?array
     {
-        /** @var bool $closure */
         $closure = Closure::bind(function (Uploader $uploader) {
             return $uploader->_file;
         }, null, Uploader::class);
@@ -105,33 +103,35 @@ class SanitizeSvgUpload
      * Used to check if uploaded file mime type is valid or not
      *
      * @param Uploader $subject
-     * @param          $return
-     * @param string[] $validTypes
+     * @param mixed    $return
+     * @param array    $validTypes
+     *
+     * @return bool
      */
     public function afterCheckMimeType(Uploader $subject, $return, $validTypes = [])
     {
-        if ($subject->getFileExtension() === 'svg' && $this->config->isSvgEnabled()) {
+        if (strtolower((string)$subject->getFileExtension()) === 'svg' && $this->config->isSvgEnabled()) {
             return true;
         }
 
-        return $return;
+        return (bool)$return;
     }
 
     /**
      * Check if specified extension is allowed
      *
      * @param Uploader $subject
-     * @param          $return
+     * @param mixed    $return
      * @param string   $extension
      *
-     * @return boolean
+     * @return bool
      */
     public function afterCheckAllowedExtension(Uploader $subject, $return, $extension)
     {
-        if ($subject->getFileExtension() === 'svg' && $this->config->isSvgEnabled()) {
+        if (strtolower((string)$subject->getFileExtension()) === 'svg' && $this->config->isSvgEnabled()) {
             return true;
         }
 
-        return $return;
+        return (bool)$return;
     }
 }
