@@ -233,7 +233,7 @@ class Resize
             return '';
         }
 
-        $cacheKey = md5($imagePath . '-' . (string)$width . '-' . (string)$height . '-' . json_encode($resizeSettings) . '-' . (string)$format);
+        $cacheKey = md5($this->storeManager->getStore()->getId() . '-' . $imagePath . '-' . (string)$width . '-' . (string)$height . '-' . json_encode($resizeSettings) . '-' . (string)$format);
         if (isset($this->tempCache[$cacheKey])) {
             return $this->tempCache[$cacheKey];
         }
@@ -259,7 +259,7 @@ class Resize
                 }
 
                 // Check if image is an animated gif return original gif instead of resized still.
-                if ($this->isAnimatedGif($imagePath)) {
+                if ($this->isAnimatedGif($this->getAbsolutePathOriginal())) {
                     return $resultUrl;
                 }
             }
